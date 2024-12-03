@@ -15,6 +15,17 @@ use \stdClass;
 
 class AdminLogin extends Controller
 {
+    public function convertToObject($array) {
+        $object = new stdClass();
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = $this->convertToObject($value);
+            }
+            $object->$key = $value;
+        }
+        return $object;
+    }
+
     public function process_admin_login(Request $request){
         $validator = Validator::make($request->all(),[
             'email' =>'required|email',
@@ -80,6 +91,199 @@ class AdminLogin extends Controller
       ],400);
   
       throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_admin_dashboard(){
+        try {
+            $result = DB::select("CALL USP_GET_ADMIN_DASHBOARD(?);", [auth()->user()->Id]);
+            
+            if (empty($result)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            $menu_set = [];
+            
+            foreach ($result as $row) {
+                if (!isset($menu_set[$row->Id])) {
+                    $menu_set[$row->Id] = [
+                        "title" => $row->Module_Name,
+                        "Icon" => $row->Icon,
+                        "path" => $row->Page_Alies,
+                        "childLinks" => []
+                    ];
+                }
+                if ($row->Sub_Module_Name) {
+                    $menu_set[$row->Id]['childLinks'][] = [
+                        "Menue_Name" => $row->Sub_Module_Name,
+                        "Icon" => $row->Icon,
+                        "Page_Allies" => $row->Page_Alis
+                    ];
+                }
+            }
+    
+            $menu_set = array_values($menu_set);
+    
+            return response()->json([
+                'message' => 'Data Found',
+                'Data' => $menu_set
+            ], 200);
+    
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function process_log_out(){
+        auth()->user()->tokens()->delete();
+        return response()->json([
+            'message' => 'Logout Successfull'
+            
+        ],200);
+    }
+
+    public function process_admin_user(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_mail' =>'required|email',
+            'user_name' =>'required',
+            'user_mob' => 'required',
+            'user_pass' => 'required',
+            'is_admin' => 'required'
+        ]);
+
+        if($validator->passes()){
+            try {
+
+                DB::beginTransaction();
+
+                $sql = DB::statement("Call USP_ADD_ADMIN_USER(?,?,?,?,?,?,@error,@messg);",[$request->user_name,$request->user_mail,$request->user_mob,Hash::make($request->user_pass),$request->is_admin,auth()->user()->Id]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => $message,
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_user_list(){
+        try {
+           
+            $sql = DB::select("Select Id,User_Mail From mst_admin_user Where Is_Active=? And Is_Admin=?;",[1,0]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function get_module_list(){
+        try {
+            $result = DB::select("CALL USP_GET_ADMIN_MODULE();");
+            
+            if (empty($result)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            $menu_set = [];
+            
+            foreach ($result as $row) {
+                if (!isset($menu_set[$row->Id])) {
+                    $menu_set[$row->Id] = [
+                        "title" => $row->Module_Name,
+                        "Icon" => $row->Icon,
+                        "path" => $row->Page_Alies,
+                        "childLinks" => []
+                    ];
+                }
+                if ($row->Sub_Module_Name) {
+                    $menu_set[$row->Id]['childLinks'][] = [
+                        "Menue_Name" => $row->Sub_Module_Name,
+                        "Icon" => $row->Icon,
+                        "Page_Allies" => $row->Page_Alis
+                    ];
+                }
+            }
+    
+            $menu_set = array_values($menu_set);
+    
+            return response()->json([
+                'message' => 'Data Found',
+                'Data' => $menu_set
+            ], 200);
+    
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
         }
     }
 }
