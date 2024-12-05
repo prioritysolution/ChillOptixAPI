@@ -286,4 +286,72 @@ class AdminLogin extends Controller
             ], 400);
         }
     }
+
+    public function process_map_user_module(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_id' =>'required',
+            'module_array' => 'required'
+        ]);
+        if($validator->passes()){
+            try {
+
+                DB::beginTransaction();
+
+                $module_list = $this->convertToObject($request->module_array);
+                $drop_table = DB::statement("Drop Temporary Table If Exists tempmodule;");
+                $create_tabl = DB::statement("Create Temporary Table tempmodule
+                                        (
+                                            Module_Id				Int,
+                                            Menue_Id				Int
+                                        );");
+                foreach ($module_list as $module) {
+                   DB::statement("Insert Into tempmodule (Module_Id,Menue_Id) Values (?,?);",[$module->module_id,$module->menue_id]);
+                }
+
+                $sql = DB::statement("Call USP_MAP_ADMIN_USER_MODULE(?,?,@error,@messg);",[$request->user_id,auth()->user()->Id]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack(); 
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => "User Module Maped Successfully !!",
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
+        }
+    }
 }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 // Admin Controller Start
 use App\Http\Controllers\Admin\AdminLogin;
+use App\Http\Controllers\Admin\ProcessOrgination;
 
 // Admin Controller End
 
@@ -28,13 +29,24 @@ Route::group([
     'middleware' => ['auth:sanctum',]
 ],function(){
 
+    // login & Dashboard Route
+
     Route::get('/Admin/GetDashboard',[AdminLogin::class,'get_admin_dashboard']);
     Route::get('/Admin/ProcessLogOut',[AdminLogin::class,'process_log_out']);
     Route::post('/Admin/AddUser',[AdminLogin::class,'process_admin_user']);
     Route::get('/Admin/GetUserList',[AdminLogin::class,'get_user_list']);
     Route::get('/Admin/GetModuleList',[AdminLogin::class,'get_module_list']);
+    Route::post('/Admin/MapUserModule',[AdminLogin::class,'process_map_user_module']);
+
+    // Login & Dashboard Route
+
+    // Process Orgination Route Start Here
+
+
+
+    // Orgination Route End Here
 });
 
 // login route end
 
-// end admin route area
+//admin route end area
