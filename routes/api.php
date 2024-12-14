@@ -9,6 +9,10 @@ use App\Http\Controllers\Admin\ProcessOrgination;
 
 // Admin Controller End
 
+// User Controller Start
+use App\Http\Controllers\Orgination\UserLogin;
+
+// User Controller End Here
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,7 +35,7 @@ Route::group([
 
     // login & Dashboard Route
 
-    Route::get('/Admin/GetDashboard',[AdminLogin::class,'get_admin_dashboard']);
+    Route::get('/Admin/GetSideBar',[AdminLogin::class,'get_admin_dashboard']);
     Route::get('/Admin/ProcessLogOut',[AdminLogin::class,'process_log_out']);
     Route::post('/Admin/AddUser',[AdminLogin::class,'process_admin_user']);
     Route::get('/Admin/GetUserList',[AdminLogin::class,'get_user_list']);
@@ -42,6 +46,12 @@ Route::group([
 
     // Process Orgination Route Start Here
 
+    Route::post('/Admin/ProcessOrg/AddOrg',[ProcessOrgination::class,'process_org']);
+    Route::post('/Admin/ProcessOrg/AddFinYear',[ProcessOrgination::class,'process_org_finyear']);
+    Route::get('/Admin/ProcessOrg/CheckRental/{org_id}',[ProcessOrgination::class,'check_org_rental']);
+    Route::post('/Admin/ProcessOrg/AddRental',[ProcessOrgination::class,'process_rental']);
+    Route::get('/Admin/ProcessOrg/GetUserRole',[ProcessOrgination::class,'get_org_user_role']);
+    Route::post('/Admin/ProcessOrg/AddUser',[ProcessOrgination::class,'process_org_user']);
 
 
     // Orgination Route End Here
@@ -50,3 +60,14 @@ Route::group([
 // login route end
 
 //admin route end area
+
+// User Route Area
+
+// Login Route
+
+Route::post('/Org/ProcessLogin',[AdminLogin::class,'process_user_login'])->middleware('api_access');
+
+
+
+
+// End User Route Area

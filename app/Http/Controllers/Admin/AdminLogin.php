@@ -47,9 +47,9 @@ class AdminLogin extends Controller
 
                 if($db_error<0){
                     $response = response()->json([
-                        'message' => 'Error Found',
-                        'details' => $db_message,
-                    ],200);
+                        'message' => $db_message,
+                        'details' => null,
+                    ],400);
         
                     return $response;
                 }
@@ -65,9 +65,9 @@ class AdminLogin extends Controller
                     }
                     else{
                         $response = response()->json([
-                            'message' => 'Error Found',
-                            'details' => 'Invalid Password'
-                        ],200);
+                            'message' => 'Invalid Password',
+                            'details' => null
+                        ],400);
                     
                         return $response;
                     }
@@ -75,8 +75,8 @@ class AdminLogin extends Controller
 
             } catch (Exception $ex) {
                 $response = response()->json([
-                    'message' => 'Error Found',
-                    'details' => $ex->getMessage(),
+                    'message' => $ex->getMessage(),
+                    'details' => null,
                 ],400);
     
                 throw new HttpResponseException($response);
@@ -86,8 +86,8 @@ class AdminLogin extends Controller
             $errors = $validator->errors();
 
         $response = response()->json([
-          'message' => 'Invalid data send',
-          'details' => $errors->messages(),
+          'message' => $errors->messages(),
+          'details' => null,
       ],400);
   
       throw new HttpResponseException($response);
@@ -102,8 +102,8 @@ class AdminLogin extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
-                ], 200);
+                    'details' => null,
+                ], 400);
             }
 
             $menu_set = [];
@@ -130,13 +130,13 @@ class AdminLogin extends Controller
     
             return response()->json([
                 'message' => 'Data Found',
-                'Data' => $menu_set
+                'details' => $menu_set
             ], 200);
     
         } catch (Exception $ex) {
             return response()->json([
-                'message' => 'Error Found',
-                'details' => $ex->getMessage(),
+                'message' => $ex->getMessage(),
+                'details' => null,
             ], 400);
         }
     }
@@ -144,8 +144,8 @@ class AdminLogin extends Controller
     public function process_log_out(){
         auth()->user()->tokens()->delete();
         return response()->json([
-            'message' => 'Logout Successfull'
-            
+            'message' => 'Logout Successfull',
+            'details' => null,
         ],200);
     }
 
@@ -176,23 +176,23 @@ class AdminLogin extends Controller
                 if($error_No<0){
                     DB::rollBack();
                     return response()->json([
-                        'message' => 'Error Found',
-                        'details' => $message,
-                    ],200);
+                        'message' => $message,
+                        'details' => null,
+                    ],400);
                 }
                 else{
                     DB::commit();
                     return response()->json([
-                        'message' => 'Success',
-                        'details' => $message,
+                        'message' => $message,
+                        'details' => null,
                     ],200);
                 }
 
             } catch (Exception $ex) {
                 DB::rollBack(); 
                 $response = response()->json([
-                    'message' => 'Error Found',
-                    'details' => $ex->getMessage(),
+                    'message' => $ex->getMessage(),
+                    'details' => null,
                 ],400);
     
                 throw new HttpResponseException($response);
@@ -202,8 +202,8 @@ class AdminLogin extends Controller
             $errors = $validator->errors();
 
             $response = response()->json([
-              'message' => 'Invalid data send',
-              'details' => $errors->messages(),
+              'message' => $errors->messages(),
+              'details' => null,
           ],400);
       
           throw new HttpResponseException($response);
@@ -219,8 +219,8 @@ class AdminLogin extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
-                ], 200);
+                    'details' => null,
+                ], 400);
             }
 
             
@@ -232,8 +232,8 @@ class AdminLogin extends Controller
 
         } catch (Exception $ex) {
             $response = response()->json([
-                'message' => 'Error Found',
-                'details' => $ex->getMessage(),
+                'message' => $ex->getMessage(),
+                'details' => null,
             ],400);
 
             throw new HttpResponseException($response);
@@ -248,8 +248,8 @@ class AdminLogin extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
-                ], 200);
+                    'details' => null,
+                ], 400);
             }
 
             $menu_set = [];
@@ -281,8 +281,8 @@ class AdminLogin extends Controller
     
         } catch (Exception $ex) {
             return response()->json([
-                'message' => 'Error Found',
-                'details' => $ex->getMessage(),
+                'message' => $ex->getMessage(),
+                'details' => null,
             ], 400);
         }
     }
@@ -321,23 +321,23 @@ class AdminLogin extends Controller
                 if($error_No<0){
                     DB::rollBack(); 
                     return response()->json([
-                        'message' => 'Error Found',
-                        'details' => $message,
-                    ],200);
+                        'message' => $message,
+                        'details' => null,
+                    ],400);
                 }
                 else{
                     DB::commit();
                     return response()->json([
-                        'message' => 'Success',
-                        'details' => "User Module Maped Successfully !!",
+                        'message' => "User Module Maped Successfully !!",
+                        'details' => null,
                     ],200);
                 }
 
             } catch (Exception $ex) {
                 DB::rollBack(); 
                 $response = response()->json([
-                    'message' => 'Error Found',
-                    'details' => $ex->getMessage(),
+                    'message' => $ex->getMessage(),
+                    'details' => null,
                 ],400);
     
                 throw new HttpResponseException($response);
@@ -347,8 +347,8 @@ class AdminLogin extends Controller
             $errors = $validator->errors();
 
             $response = response()->json([
-              'message' => 'Invalid data send',
-              'details' => $errors->messages(),
+              'message' => $errors->messages(),
+              'details' => null,
           ],400);
       
           throw new HttpResponseException($response);
