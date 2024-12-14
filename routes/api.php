@@ -68,6 +68,20 @@ Route::group([
 Route::post('/Org/ProcessLogin',[AdminLogin::class,'process_user_login'])->middleware('api_access');
 
 
+Route::group([
+    'middleware' => ['auth:sanctum',]
+],function(){
+
+// Dashboard Route Start
+
+
+// Dashboard End
+
+
+});
+
+
+
 
 
 // End User Route Area
