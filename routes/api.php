@@ -47,6 +47,7 @@ Route::group([
     // Process Orgination Route Start Here
 
     Route::post('/Admin/ProcessOrg/AddOrg',[ProcessOrgination::class,'process_org']);
+    Route::get('/Admin/ProcessOrg/GetOrgList',[ProcessOrgination::class,'get_org_list']);
     Route::post('/Admin/ProcessOrg/AddFinYear',[ProcessOrgination::class,'process_org_finyear']);
     Route::get('/Admin/ProcessOrg/CheckRental/{org_id}',[ProcessOrgination::class,'check_org_rental']);
     Route::post('/Admin/ProcessOrg/AddRental',[ProcessOrgination::class,'process_rental']);
@@ -65,7 +66,7 @@ Route::group([
 
 // Login Route
 
-Route::post('/Org/ProcessLogin',[AdminLogin::class,'process_user_login'])->middleware('api_access');
+Route::post('/Org/ProcessLogin',[UserLogin::class,'process_user_login'])->middleware('api_access');
 
 
 Route::group([
@@ -73,7 +74,7 @@ Route::group([
 ],function(){
 
 // Dashboard Route Start
-
+Route::get('/Org/GetSideBar',[UserLogin::class,'get_user_sidebar']);
 
 // Dashboard End
 

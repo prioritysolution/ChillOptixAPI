@@ -315,4 +315,34 @@ class ProcessOrgination extends Controller
           throw new HttpResponseException($response);
         }
     }
+
+    public function get_org_list(){
+        try {
+           
+            $sql = DB::select("Select Id,Org_Name From mst_org_register Where Is_Active=1");
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 400);
+            }
+
+            
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
 }

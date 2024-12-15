@@ -110,4 +110,51 @@ class UserLogin extends Controller
       throw new HttpResponseException($response);
         }
     }
+
+    public function get_user_sidebar(){
+        try {
+            $result = DB::select("CALL USP_GET_ORG_USER_DASHBOARD(?);", [auth()->user()->Id]);
+            
+            if (empty($result)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 400);
+            }
+
+            $menu_set = [];
+            
+            foreach ($result as $row) {
+                if (!isset($menu_set[$row->Id])) {
+                    $menu_set[$row->Id] = [
+                        "title" => $row->Module_Name,
+                        "Icon" => $row->Icon,
+                        "path" => $row->Page_Alies,
+                        "childLinks" => []
+                    ];
+                }
+                if ($row->Menue_Name) {
+                    $menu_set[$row->Id]['childLinks'][] = [
+                        "Menue_Name" => $row->Menue_Name,
+                        "Icon" => $row->Icon,
+                        "Page_Allies" => $row->Page_Alies
+                    ];
+                }
+            }
+    
+            $menu_set = array_values($menu_set);
+    
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $menu_set
+            ], 200);
+    
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ], 400);
+        }
+    }
 }
