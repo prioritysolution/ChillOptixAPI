@@ -257,17 +257,15 @@ class AdminLogin extends Controller
             foreach ($result as $row) {
                 if (!isset($menu_set[$row->Id])) {
                     $menu_set[$row->Id] = [
-                        "title" => $row->Module_Name,
-                        "Icon" => $row->Icon,
-                        "path" => $row->Page_Alies,
+                        "Module_Id" => $row->Id,
+                        "Module_Name" => $row->Module_Name,
                         "childLinks" => []
                     ];
                 }
                 if ($row->Sub_Module_Name) {
                     $menu_set[$row->Id]['childLinks'][] = [
+                        "Id" => $row->Sub_Id,
                         "Menue_Name" => $row->Sub_Module_Name,
-                        "Icon" => $row->Icon,
-                        "Page_Allies" => $row->Page_Alis
                     ];
                 }
             }
@@ -276,7 +274,7 @@ class AdminLogin extends Controller
     
             return response()->json([
                 'message' => 'Data Found',
-                'Data' => $menu_set
+                'details' => $menu_set
             ], 200);
     
         } catch (Exception $ex) {

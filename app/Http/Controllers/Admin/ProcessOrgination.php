@@ -146,7 +146,7 @@ class ProcessOrgination extends Controller
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => null,
-                ], 400);
+                ], 204);
             }
 
             

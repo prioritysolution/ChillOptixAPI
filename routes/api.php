@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\ProcessOrgination;
 // Admin Controller End
 
 // User Controller Start
-use App\Http\Controllers\Orgination\UserLogin;
+use App\Http\Controllers\Organisation\UserLogin;
 
 // User Controller End Here
 /*
