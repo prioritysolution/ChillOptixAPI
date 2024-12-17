@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\ProcessOrgination;
 
 // User Controller Start
 use App\Http\Controllers\Organisation\UserLogin;
-
+use App\Http\Controllers\Organisation\ProcessMaster;
 // User Controller End Here
 /*
 |--------------------------------------------------------------------------
@@ -77,7 +77,13 @@ Route::group([
 Route::get('/Org/GetSideBar',[UserLogin::class,'get_user_sidebar']);
 
 // Dashboard End
+// Master Route Start
 
+Route::post('/Org/Master/AddFloor',[ProcessMaster::class,'process_floor']);
+Route::get('/Org/Master/GetFloor/{org_id}',[ProcessMaster::class,'get_floor_list']);
+Route::put('/Org/Master/UpdateFloor',[ProcessMaster::class,'update_floor']);
+
+// Master Route ENd
 
 });
 
