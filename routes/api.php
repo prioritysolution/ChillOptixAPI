@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProcessOrgination;
 // User Controller Start
 use App\Http\Controllers\Organisation\UserLogin;
 use App\Http\Controllers\Organisation\ProcessMaster;
+use App\Http\Controllers\Organisation\ProcessProcessing;
 // User Controller End Here
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,10 @@ Route::group([
 
 //admin route end area
 
+
+
+
+
 // User Route Area
 
 // Login Route
@@ -82,8 +87,33 @@ Route::get('/Org/GetSideBar',[UserLogin::class,'get_user_sidebar']);
 Route::post('/Org/Master/AddFloor',[ProcessMaster::class,'process_floor']);
 Route::get('/Org/Master/GetFloor/{org_id}',[ProcessMaster::class,'get_floor_list']);
 Route::put('/Org/Master/UpdateFloor',[ProcessMaster::class,'update_floor']);
+Route::post('/Org/Master/AddChamber',[ProcessMaster::class,'process_chamber']);
+Route::get('/Org/Master/GetChamber/{org_id}',[ProcessMaster::class,'get_chamber_list']);
+Route::put('/Org/Master/UpdateChamber',[ProcessMaster::class,'update_chamber']);
+Route::get('/Org/Master/GetFloorChamber/{org_id}/{floor_id}',[ProcessMaster::class,'get_flrwise_chamber']);
+Route::post('/Org/Master/AddRack',[ProcessMaster::class,'process_rack']);
+Route::get('/Org/Master/GetRack/{org_id}',[ProcessMaster::class,'get_rack_list']);
+Route::put('/Org/Master/UpdateRack',[ProcessMaster::class,'update_rack']);
+Route::post('/Org/Master/AddPocket',[ProcessMaster::class,'process_pocket']);
+Route::get('/Org/Master/GetPocket/{org_id}',[ProcessMaster::class,'get_pocket_list']);
+Route::put('/Org/Master/UpdatePocket',[ProcessMaster::class,'update_pocket']);
+Route::post('/Org/Master/AddAgent',[ProcessMaster::class,'process_agent']);
+Route::get('/Org/Master/GetAgent/{org_id}',[ProcessMaster::class,'get_agent_list']);
+Route::put('/Org/Master/UpdateAgent',[ProcessMaster::class,'update_agent']);
+Route::post('/Org/Master/AddRent',[ProcessMaster::class,'process_rent']);
+Route::get('/Org/Master/GetBankLedger',[ProcessMaster::class,'get_bank_ledger']);
+Route::post('/Org/Master/AddBankAccount',[ProcessMaster::class,'process_bank_account']);
+Route::get('/Org/Master/GetBankAccount/{org_id}',[ProcessMaster::class,'get_bank_account_list']);
 
-// Master Route ENd
+// Master Route End
+
+// Processing Route Start
+
+Route::post('/Org/Processing/GeneralBooking',[ProcessProcessing::class,'process_general_booking']);
+Route::get('/Org/Processing/GetBookingData/{org_id}/{book_id}',[ProcessProcessing::class,'get_gen_booking']);
+Route::get('/Org/Processing/GetCustomer/{org_id}/{keyword}',[ProcessProcessing::class,'get_customer']);
+
+// Processing Route End
 
 });
 

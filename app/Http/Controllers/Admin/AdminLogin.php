@@ -49,7 +49,7 @@ class AdminLogin extends Controller
                     $response = response()->json([
                         'message' => $db_message,
                         'details' => null,
-                    ],400);
+                    ],202);
         
                     return $response;
                 }
@@ -67,7 +67,7 @@ class AdminLogin extends Controller
                         $response = response()->json([
                             'message' => 'Invalid Password',
                             'details' => null
-                        ],400);
+                        ],202);
                     
                         return $response;
                     }
@@ -88,7 +88,7 @@ class AdminLogin extends Controller
         $response = response()->json([
           'message' => $errors->messages(),
           'details' => null,
-      ],400);
+      ],202);
   
       throw new HttpResponseException($response);
         }
@@ -103,7 +103,7 @@ class AdminLogin extends Controller
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => null,
-                ], 400);
+                ], 202);
             }
 
             $menu_set = [];
@@ -178,7 +178,7 @@ class AdminLogin extends Controller
                     return response()->json([
                         'message' => $message,
                         'details' => null,
-                    ],400);
+                    ],202);
                 }
                 else{
                     DB::commit();
@@ -204,7 +204,7 @@ class AdminLogin extends Controller
             $response = response()->json([
               'message' => $errors->messages(),
               'details' => null,
-          ],400);
+          ],202);
       
           throw new HttpResponseException($response);
         }
@@ -220,7 +220,7 @@ class AdminLogin extends Controller
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => null,
-                ], 400);
+                ], 202);
             }
 
             
@@ -249,7 +249,7 @@ class AdminLogin extends Controller
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => null,
-                ], 400);
+                ], 202);
             }
 
             $menu_set = [];
@@ -321,7 +321,7 @@ class AdminLogin extends Controller
                     return response()->json([
                         'message' => $message,
                         'details' => null,
-                    ],400);
+                    ],202);
                 }
                 else{
                     DB::commit();
@@ -347,7 +347,7 @@ class AdminLogin extends Controller
             $response = response()->json([
               'message' => $errors->messages(),
               'details' => null,
-          ],400);
+          ],202);
       
           throw new HttpResponseException($response);
         }

@@ -58,7 +58,7 @@ class UserLogin extends Controller
                     $response = response()->json([
                         'message' => $db_message,
                         'details' => null,
-                    ],400);
+                    ],202);
         
                     return $response;
                 }
@@ -84,7 +84,7 @@ class UserLogin extends Controller
                         $response = response()->json([
                             'message' => 'Invalid Password',
                             'details' => null
-                        ],400);
+                        ],202);
                     
                         return $response;
                     }
@@ -120,7 +120,7 @@ class UserLogin extends Controller
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => null,
-                ], 400);
+                ], 202);
             }
 
             $menu_set = [];
@@ -130,7 +130,7 @@ class UserLogin extends Controller
                     $menu_set[$row->Id] = [
                         "title" => $row->Module_Name,
                         "Icon" => $row->Icon,
-                        "path" => $row->Page_Alies,
+                        "path" => $row->Module_Path,
                         "childLinks" => []
                     ];
                 }
