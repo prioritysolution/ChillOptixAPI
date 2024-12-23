@@ -36,12 +36,12 @@ class UserLogin extends Controller
         if($validator->passes()){
             try {
             
-                $sql = DB::statement("Call USP_PUSH_ORG_USER_LOGIN(?,?,@error,@message,@user_pass,@org_id,@org_name,@org_add,@org_mob,@org_reg,@org_r_date,@org_fin_start,@org_fin_end);",[$request->email,$request->date]);
+                $sql = DB::statement("Call USP_PUSH_ORG_USER_LOGIN(?,?,@error,@message,@user_pass,@org_id,@org_name,@org_add,@org_mob,@org_reg,@org_r_date,@org_fin_start,@org_fin_end,@fin_id);",[$request->email,$request->date]);
 
                 if(!$sql){
                     throw new Exception("Operation Could Not Be Complete");
                 }
-                $result = DB::select("Select @user_pass As Pass,@error As Error_No,@message As Message,@org_id As Org_Id,@org_name As Org_Name,@org_add As org_add,@org_mob As Mob,@org_reg As Reg,@org_r_date As Reg_Date,@org_fin_start As Fin_Start,@org_fin_end As Fin_End");
+                $result = DB::select("Select @user_pass As Pass,@error As Error_No,@message As Message,@org_id As Org_Id,@org_name As Org_Name,@org_add As org_add,@org_mob As Mob,@org_reg As Reg,@org_r_date As Reg_Date,@org_fin_start As Fin_Start,@org_fin_end As Fin_End,@fin_id As Fin_Id");
                 $db_error = $result[0]->Error_No;
                 $db_message = $result[0]->Message;
                 $user_pass = $result[0]->Pass;
@@ -53,6 +53,7 @@ class UserLogin extends Controller
                 $org_reg_date = $result[0]->Reg_Date;
                 $fin_start = $result[0]->Fin_Start;
                 $fin_end = $result[0]->Fin_End;
+                $fin_id = $result[0]->Fin_Id;
 
                 if($db_error<0){
                     $response = response()->json([
@@ -77,7 +78,8 @@ class UserLogin extends Controller
                             'org_reg'=>$org_reg,
                             'org_reg_date'=>$org_reg_date,
                             'fin_start'=>$fin_start,
-                            'fin_end'=>$fin_end
+                            'fin_end'=>$fin_end,
+                            'fin_id' =>$fin_id
                         ],200);
                     }
                     else{

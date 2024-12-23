@@ -1077,4 +1077,76 @@ class ProcessMaster extends Controller
             throw new HttpResponseException($response);
         }
     }
+
+    public function get_chamber_rack(Int $org_id,Int $chamber_id){
+        try {
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+
+            $sql = DB::connection('chill')->select("Select Id,Rack_Name From mst_rack_master Where Chamber_Id=? Order By Id",[$chamber_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 202);
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_rack_pocket(Int $org_id,Int $rack_id){
+        try {
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+
+            $sql = DB::connection('chill')->select("Select Id,Pocket_Name From mst_rack_master Where Rack_Id=? Order By Id",[$rack_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 202);
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
 }

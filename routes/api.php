@@ -104,6 +104,8 @@ Route::post('/Org/Master/AddRent',[ProcessMaster::class,'process_rent']);
 Route::get('/Org/Master/GetBankLedger',[ProcessMaster::class,'get_bank_ledger']);
 Route::post('/Org/Master/AddBankAccount',[ProcessMaster::class,'process_bank_account']);
 Route::get('/Org/Master/GetBankAccount/{org_id}',[ProcessMaster::class,'get_bank_account_list']);
+Route::get('/Org/Master/GetChamberRack/{org_id}/{chamber_id}',[ProcessMaster::class,'get_chamber_rack']);
+Route::get('/Org/Master/GetRackPocket/{org_id}/{rack_id}',[ProcessMaster::class,'get_rack_pocket']);
 
 // Master Route End
 
@@ -112,6 +114,12 @@ Route::get('/Org/Master/GetBankAccount/{org_id}',[ProcessMaster::class,'get_bank
 Route::post('/Org/Processing/GeneralBooking',[ProcessProcessing::class,'process_general_booking']);
 Route::get('/Org/Processing/GetBookingData/{org_id}/{book_id}',[ProcessProcessing::class,'get_gen_booking']);
 Route::get('/Org/Processing/GetCustomer/{org_id}/{keyword}',[ProcessProcessing::class,'get_customer']);
+Route::get('/Org/Processing/GetBookingDetails/{org_id}/{book_no}',[ProcessProcessing::class,'get_booking_details']);
+Route::get('/Org/Processing/SearchBooking/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_booking_data']);
+Route::post('/Org/Processing/BondEntry',[ProcessProcessing::class,'process_bond']);
+Route::get('/Org/Processing/SearchBond/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_bond']);
+Route::get('/Org/Processing/GetBondDetails/{org_id}/{bond_id}',[ProcessProcessing::class,'get_bond_details']);
+Route::post('/Org/Processing/RackPosting',[ProcessProcessing::class,'process_rack_posting']);
 
 // Processing Route End
 
