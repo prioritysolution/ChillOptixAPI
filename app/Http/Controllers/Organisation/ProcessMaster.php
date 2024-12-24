@@ -1125,7 +1125,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
 
-            $sql = DB::connection('chill')->select("Select Id,Pocket_Name From mst_rack_master Where Rack_Id=? Order By Id",[$rack_id]);
+            $sql = DB::connection('chill')->select("Select Id,Pocket_Name From mst_pocket_master Where Rack_Id=? Order By Id",[$rack_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found

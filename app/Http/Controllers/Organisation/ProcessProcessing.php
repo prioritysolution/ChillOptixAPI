@@ -283,8 +283,8 @@ public function process_bond(Request $request){
         config()->set('database.connections.chill', $db);
         DB::connection('chill')->beginTransaction();
 
-        $drop_table = DB::statement("Drop Temporary Table If Exists tempbonddata;");
-        $create_tabl = DB::statement("Create Temporary Table tempbonddata
+        $drop_table = DB::connection('chill')->statement("Drop Temporary Table If Exists tempbonddata;");
+        $create_tabl = DB::connection('chill')->statement("Create Temporary Table tempbonddata
                                         (
                                             Bond_Qnty				Numeric(18,2),
                                             Bond_Pack				Int,
@@ -292,7 +292,7 @@ public function process_bond(Request $request){
                                         );");
         $bond_data = $this->convertToObject($request->bond_data);
         foreach ($bond_data as $bond) {
-            DB::statement("Insert Into tempbonddata (Bond_Qnty,Bond_Pack,Is_Verified) Values (?,?,?);",[$bond->bond_qnty,$bond->bond_pack,$bond->verified]);
+            DB::connection('chill')->statement("Insert Into tempbonddata (Bond_Qnty,Bond_Pack,Is_Verified) Values (?,?,?);",[$bond->bond_qnty,$bond->bond_pack,$bond->verified]);
          }
         $sql = DB::connection('chill')->statement("Call USP_POST_BOND_ENTRY(?,?,?,?,@error,@message,@bond);",[$request->book_id,$request->bond_date,$request->fin_id,auth()->user()->Id]);
 
@@ -303,6 +303,8 @@ public function process_bond(Request $request){
         $error_No = $result[0]->Error_No;
         $message = $result[0]->Message;
         $booking_Id = $result[0]->bond_details;
+
+        $bond_details_decoded = json_decode($booking_Id);
 
         if($error_No<0){
             DB::connection('chill')->rollBack();
@@ -315,7 +317,7 @@ public function process_bond(Request $request){
             DB::connection('chill')->commit();
             return response()->json([
                 'message' => $message,
-                'details' => $booking_Id,
+                'details' => $bond_details_decoded,
             ],200);
         }
         
@@ -432,8 +434,8 @@ public function process_rack_posting(Request $request){
         config()->set('database.connections.chill', $db);
         DB::connection('chill')->beginTransaction();
 
-        $drop_table = DB::statement("Drop Temporary Table If Exists temprackdata;");
-        $create_tabl = DB::statement("Create Temporary Table temprackdata
+        $drop_table = DB::connection('chill')->statement("Drop Temporary Table If Exists temprackdata;");
+        $create_tabl = DB::connection('chill')->statement("Create Temporary Table temprackdata
                                         (
                                             floor_id		Int,
                                             chamb_id		Int,
@@ -443,7 +445,7 @@ public function process_rack_posting(Request $request){
                                         );");
         $rack_details = $this->convertToObject($request->rack_details);
         foreach ($rack_details as $rack) {
-            DB::statement("Insert Into tempbonddata (floor_id,chamb_id,rack_id,pocket_id,no_pack) Values (?,?,?,?,?);",[$rack->floor,$rack->chamber,$rack->rack,$rack->pocket,$rack->no_pack]);
+            DB::connection('chill')->statement("Insert Into tempbonddata (floor_id,chamb_id,rack_id,pocket_id,no_pack) Values (?,?,?,?,?);",[$rack->floor,$rack->chamber,$rack->rack,$rack->pocket,$rack->no_pack]);
          }
         $sql = DB::connection('chill')->statement("Call USP_ADD_RACK_POSTING(?,?,?);",[$request->bond_id,$request->post_date,auth()->user()->Id]);
 
