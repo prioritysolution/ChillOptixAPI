@@ -419,7 +419,8 @@ public function process_rack_posting(Request $request){
     $validator = Validator::make($request->all(),[
         'org_id' => 'required',
         'bond_id' => 'required',
-        'post_date' => 'required'
+        'post_date' => 'required',
+        'rack_details' => 'required'
     ]);
     if($validator->passes()){
     try {
