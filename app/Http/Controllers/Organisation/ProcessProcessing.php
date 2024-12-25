@@ -446,7 +446,7 @@ public function process_rack_posting(Request $request){
                                         );");
         $rack_details = $this->convertToObject($request->rack_details);
         foreach ($rack_details as $rack) {
-            DB::connection('chill')->statement("Insert Into tempbonddata (floor_id,chamb_id,rack_id,pocket_id,no_pack) Values (?,?,?,?,?);",[$rack->floor,$rack->chamber,$rack->rack,$rack->pocket,$rack->no_pack]);
+            DB::connection('chill')->statement("Insert Into temprackdata (floor_id,chamb_id,rack_id,pocket_id,no_pack) Values (?,?,?,?,?);",[$rack->floor,$rack->chamber,$rack->rack,$rack->pocket,$rack->no_pack]);
          }
         $sql = DB::connection('chill')->statement("Call USP_ADD_RACK_POSTING(?,?,?);",[$request->bond_id,$request->post_date,auth()->user()->Id]);
 
