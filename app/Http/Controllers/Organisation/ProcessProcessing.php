@@ -53,7 +53,7 @@ class ProcessProcessing extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_GEN_BOOKING(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@book);",[$request->org_id,$request->cust_id,$request->booking_date,$request->cust_name,$request->relation_name,$request->village,$request->post,$request->pin,$request->dist,$request->mob,$request->qunty,$request->amount,$request->bank_id,$request->valid_till,$request->ref_vouch,auth()->user()->Id,$request->fin_id]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_GEN_BOOKING(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@book);",[$request->org_id,$request->cust_id,$request->booking_date,$request->cust_name,$request->relation_name,$request->village,$request->post,$request->pin,$request->dist,$request->mob,$request->qunty,$request->amount,$request->bank_id,$request->valid_till,$request->agent_id,$request->ref_vouch,auth()->user()->Id,$request->fin_id]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -237,7 +237,43 @@ public function search_booking_data(Int $org_id,Int $type,String $keyword){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Call USP_SEARCH_BOOKING(?,?);",[$type,$keyword]);
+        $sql = DB::connection('chill')->select("Call USP_SEARCH_BOOKING(?,?,?);",[$type,$keyword,1]);
+
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found',
+                'details' => null,
+            ], 202);
+        }
+
+        return response()->json([
+            'message' => 'Data Found',
+            'details' => $sql,
+        ],200);
+
+    } catch (Exception $ex) {
+        $response = response()->json([
+            'message' => 'Error Found',
+            'details' => $ex->getMessage(),
+        ],400);
+
+        throw new HttpResponseException($response);
+    } 
+}
+
+public function search_rack_book(Int $org_id,Int $type,String $keyword){
+    try {
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+
+        $sql = DB::connection('chill')->select("Call USP_SEARCH_BOOKING(?,?,?);",[$type,$keyword,2]);
 
         if (empty($sql)) {
             // Custom validation for no data found
@@ -288,13 +324,13 @@ public function process_bond(Request $request){
                                         (
                                             Bond_Qnty				Numeric(18,2),
                                             Bond_Pack				Int,
-                                            Is_Verified				Int
+                                            Remarks				    Varchar(150)
                                         );");
         $bond_data = $this->convertToObject($request->bond_data);
         foreach ($bond_data as $bond) {
-            DB::connection('chill')->statement("Insert Into tempbonddata (Bond_Qnty,Bond_Pack,Is_Verified) Values (?,?,?);",[$bond->bond_qnty,$bond->bond_pack,$bond->verified]);
+            DB::connection('chill')->statement("Insert Into tempbonddata (Bond_Qnty,Bond_Pack,Remarks) Values (?,?,?);",[$bond->bond_qnty,$bond->bond_pack,$bond->verified]);
          }
-        $sql = DB::connection('chill')->statement("Call USP_POST_BOND_ENTRY(?,?,?,?,@error,@message,@bond);",[$request->book_id,$request->bond_date,$request->fin_id,auth()->user()->Id]);
+        $sql = DB::connection('chill')->statement("Call USP_POST_BOND_ENTRY(?,?,?,?,?,@error,@message,@bond);",[$request->org_id,$request->book_id,$request->bond_date,$request->fin_id,auth()->user()->Id]);
 
         if(!$sql){
             throw new Exception('Operation Error Found !!');
@@ -390,7 +426,43 @@ public function get_bond_details(Int $org_id,Int $bond_id){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Call USP_GET_BOND_DETAILS(?,?);",[$bond_id,2]);
+        $sql = DB::connection('chill')->select("Call USP_GET_BOND_DETAILS(?,?);",[$bond_id,1]);
+
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found',
+                'details' => null,
+            ], 202);
+        }
+
+        return response()->json([
+            'message' => 'Data Found',
+            'details' => $sql,
+        ],200);
+
+    } catch (Exception $ex) {
+        $response = response()->json([
+            'message' => 'Error Found',
+            'details' => $ex->getMessage(),
+        ],400);
+
+        throw new HttpResponseException($response);
+    } 
+}
+
+public function get_bond_list(Int $org_id,Int $book_id){
+    try {
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+
+        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=?",[$book_id]);
 
         if (empty($sql)) {
             // Custom validation for no data found
@@ -418,7 +490,6 @@ public function get_bond_details(Int $org_id,Int $bond_id){
 public function process_rack_posting(Request $request){
     $validator = Validator::make($request->all(),[
         'org_id' => 'required',
-        'bond_id' => 'required',
         'post_date' => 'required',
         'rack_details' => 'required'
     ]);
@@ -438,17 +509,20 @@ public function process_rack_posting(Request $request){
         $drop_table = DB::connection('chill')->statement("Drop Temporary Table If Exists temprackdata;");
         $create_tabl = DB::connection('chill')->statement("Create Temporary Table temprackdata
                                         (
+                                            Bond_Id         Int,
                                             floor_id		Int,
                                             chamb_id		Int,
                                             rack_id			Int,
                                             pocket_id		Int,
+                                            Position        Int,
                                             no_pack			Int
+
                                         );");
         $rack_details = $this->convertToObject($request->rack_details);
         foreach ($rack_details as $rack) {
-            DB::connection('chill')->statement("Insert Into temprackdata (floor_id,chamb_id,rack_id,pocket_id,no_pack) Values (?,?,?,?,?);",[$rack->floor,$rack->chamber,$rack->rack,$rack->pocket,$rack->no_pack]);
+            DB::connection('chill')->statement("Insert Into temprackdata (floor_id,chamb_id,rack_id,pocket_id,no_pack,Bond_Id,Position) Values (?,?,?,?,?,?,?);",[$rack->floor,$rack->chamber,$rack->rack,$rack->pocket,$rack->no_pack,$rack->bond_id,$rack->position]);
          }
-        $sql = DB::connection('chill')->statement("Call USP_ADD_RACK_POSTING(?,?,?);",[$request->bond_id,$request->post_date,auth()->user()->Id]);
+        $sql = DB::connection('chill')->statement("Call USP_ADD_RACK_POSTING(?,?);",[$request->post_date,auth()->user()->Id]);
 
         if(!$sql){
             throw new Exception('Operation Error Found !!');

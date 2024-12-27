@@ -106,6 +106,12 @@ Route::post('/Org/Master/AddBankAccount',[ProcessMaster::class,'process_bank_acc
 Route::get('/Org/Master/GetBankAccount/{org_id}',[ProcessMaster::class,'get_bank_account_list']);
 Route::get('/Org/Master/GetChamberRack/{org_id}/{chamber_id}',[ProcessMaster::class,'get_chamber_rack']);
 Route::get('/Org/Master/GetRackPocket/{org_id}/{rack_id}',[ProcessMaster::class,'get_rack_pocket']);
+Route::post('/Org/Master/RenewalLicence',[ProcessMaster::class,'process_licence_renewal']);
+Route::get('/Org/Master/GetRenewalList/{org_id}',[ProcessMaster::class,'get_renewal_list']);
+Route::put('/Org/Master/UpdateRenewal',[ProcessMaster::class,'update_renewal']);
+Route::post('/Org/Master/AddPosition',[ProcessMaster::class,'process_position']);
+Route::get('/Org/Master/GetPosition/{org_id}',[ProcessMaster::class,'get_position']);
+Route::put('/Org/Master/UpdatePosition',[ProcessMaster::class,'update_position']);
 
 // Master Route End
 
@@ -119,6 +125,8 @@ Route::get('/Org/Processing/SearchBooking/{org_id}/{type}/{keyword}',[ProcessPro
 Route::post('/Org/Processing/BondEntry',[ProcessProcessing::class,'process_bond']);
 Route::get('/Org/Processing/SearchBond/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_bond']);
 Route::get('/Org/Processing/GetBondDetails/{org_id}/{bond_id}',[ProcessProcessing::class,'get_bond_details']);
+Route::get('/Org/Processing/SearchBookForRack/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_rack_book']);
+Route::get('/Org/Processing/GetBondBooking/{org_id}/{book_id}',[ProcessProcessing::class,'get_bond_list']);
 Route::post('/Org/Processing/RackPosting',[ProcessProcessing::class,'process_rack_posting']);
 
 // Processing Route End

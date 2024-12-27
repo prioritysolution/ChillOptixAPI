@@ -18,7 +18,8 @@ class ProcessMaster extends Controller
         $validator = Validator::make($request->all(),[
             'org_id' => 'required',
             'floor_name' => 'required',
-            'floor_no' => 'required'
+            'floor_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -32,7 +33,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_FLOOR(?,?,?,?,?,@error,@message);",[null,$request->floor_name,$request->floor_no,auth()->user()->Id,1]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_FLOOR(?,?,?,?,?,?,@error,@message);",[null,$request->floor_name,$request->floor_no,$request->capacity,auth()->user()->Id,1]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -89,7 +90,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
 
-            $sql = DB::connection('chill')->select("Select Id,Floor_Name,Floor_No From mst_floor Order By Id");
+            $sql = DB::connection('chill')->select("Select Id,Floor_Name,Floor_No,Capacity From mst_floor Order By Id");
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -119,7 +120,8 @@ class ProcessMaster extends Controller
             'org_id' => 'required',
             'floor_id'=>'required',
             'floor_name' => 'required',
-            'floor_no' => 'required'
+            'floor_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -133,7 +135,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_FLOOR(?,?,?,?,?,@error,@message);",[$request->floor_id,$request->floor_name,$request->floor_no,auth()->user()->Id,2]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_FLOOR(?,?,?,?,?,?,@error,@message);",[$request->floor_id,$request->floor_name,$request->floor_no,$request->capacity,auth()->user()->Id,2]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -184,7 +186,8 @@ class ProcessMaster extends Controller
             'org_id' => 'required',
             'floor_id' => 'required',
             'chamber_name' => 'required',
-            'chamber_no' => 'required'
+            'chamber_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -198,7 +201,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_CHAMBER(?,?,?,?,?,?,@error,@message);",[null,$request->floor_id,$request->chamber_name,$request->chamber_no,auth()->user()->Id,1]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_CHAMBER(?,?,?,?,?,?,?,@error,@message);",[null,$request->floor_id,$request->chamber_name,$request->chamber_no,$request->capacity,auth()->user()->Id,1]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -255,7 +258,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
 
-            $sql = DB::connection('chill')->select("Select Id,Floor_Id,Chamber_Name,Chamber_No From chamber_master Order By Id");
+            $sql = DB::connection('chill')->select("Select Id,Floor_Id,Chamber_Name,Chamber_No,Capacity From chamber_master Order By Id");
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -286,7 +289,8 @@ class ProcessMaster extends Controller
             'chamber_id' => 'required',
             'floor_id'=>'required',
             'chamber_name' => 'required',
-            'chamber_no' => 'required'
+            'chamber_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -300,7 +304,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_CHAMBER(?,?,?,?,?,?,@error,@message);",[$request->chamber_id,$request->floor_id,$request->chamber_name,$request->chamber_no,auth()->user()->Id,2]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_CHAMBER(?,?,?,?,?,?,?,@error,@message);",[$request->chamber_id,$request->floor_id,$request->chamber_name,$request->chamber_no,$request->capacity,auth()->user()->Id,2]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -388,7 +392,8 @@ class ProcessMaster extends Controller
             'floor_id' => 'required',
             'chamber_id' => 'required',
             'rack_name' => 'required',
-            'rack_no' => 'required'
+            'rack_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -402,7 +407,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_RACK(?,?,?,?,?,?,?,@error,@message);",[null,$request->floor_id,$request->chamber_id,$request->rack_name,$request->rack_no,auth()->user()->Id,1]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_RACK(?,?,?,?,?,?,?,?,@error,@message);",[null,$request->floor_id,$request->chamber_id,$request->rack_name,$request->rack_no,$request->capacity,auth()->user()->Id,1]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -459,7 +464,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
 
-            $sql = DB::connection('chill')->select("Select Id,Floor_Id,Chamber_Id,Rack_Name,Rack_No From mst_rack_master Order By Id");
+            $sql = DB::connection('chill')->select("Select Id,Floor_Id,Chamber_Id,Rack_Name,Rack_No,Capacity From mst_rack_master Order By Id");
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -491,7 +496,8 @@ class ProcessMaster extends Controller
             'floor_id' => 'required',
             'chamber_id' => 'required',
             'rack_name' => 'required',
-            'rack_no' => 'required'
+            'rack_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -505,7 +511,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_RACK(?,?,?,?,?,?,?,@error,@message);",[$request->rack_id,$request->floor_id,$request->chamber_id,$request->rack_name,$request->rack_no,auth()->user()->Id,2]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_RACK(?,?,?,?,?,?,?,?,@error,@message);",[$request->rack_id,$request->floor_id,$request->chamber_id,$request->rack_name,$request->rack_no,$request->capacity,auth()->user()->Id,2]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -556,7 +562,8 @@ class ProcessMaster extends Controller
             'org_id' => 'required',
             'rack_id' => 'required',
             'pocket_name' => 'required',
-            'pocket_no' => 'required'
+            'pocket_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -570,7 +577,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_POCKET(?,?,?,?,?,?,@error,@message);",[null,$request->rack_id,$request->pocket_name,$request->pocket_no,auth()->user()->Id,1]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_POCKET(?,?,?,?,?,?,?,@error,@message);",[null,$request->rack_id,$request->pocket_name,$request->pocket_no,$request->capacity,auth()->user()->Id,1]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -627,7 +634,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
 
-            $sql = DB::connection('chill')->select("Select Id,Rack_Id,Pocket_Name,Pocket_No From mst_pocket_master Order By Id");
+            $sql = DB::connection('chill')->select("Select Id,Rack_Id,Pocket_Name,Pocket_No,Capacity From mst_pocket_master Order By Id");
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -658,7 +665,8 @@ class ProcessMaster extends Controller
             'pocket_id' => 'required',
             'rack_id' => 'required',
             'pocket_name' => 'required',
-            'pocket_no' => 'required'
+            'pocket_no' => 'required',
+            'capacity' => 'required'
         ]);
         if($validator->passes()){
         try {
@@ -672,7 +680,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_POCKET(?,?,?,?,?,?,@error,@message);",[$request->pocket_id,$request->rack_id,$request->pocket_name,$request->pocket_no,auth()->user()->Id,2]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_POCKET(?,?,?,?,?,?,?,@error,@message);",[$request->pocket_id,$request->rack_id,$request->pocket_name,$request->pocket_no,$request->capacity,auth()->user()->Id,2]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -1148,5 +1156,285 @@ class ProcessMaster extends Controller
 
             throw new HttpResponseException($response);
         }
+    }
+
+    public function process_licence_renewal(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'form_date' => 'required',
+            'till_date' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+            DB::connection('chill')->beginTransaction();
+            $sql = DB::connection('chill')->statement("Call USP_ADD_LICENCE_RENEWAL(?,?,?,?,?);",[null,$request->form_date,$request->till_date,auth()->user()->Id,1]);
+
+            if(!$sql){
+                throw new Exception('Operation Error Found !!');
+            }
+           
+                DB::connection('chill')->commit();
+                return response()->json([
+                    'message' => 'License Renewed Successfully !!',
+                    'details' => null,
+                ],200);
+            
+        } catch (Exception $ex) {
+            DB::connection('chill')->rollBack();
+            $response = response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => $errors->messages(),
+                'details' => null,
+            ],202);
+        
+            throw new HttpResponseException($response);
+    } 
+    }
+
+    public function get_renewal_list(Int $org_id){
+        try {
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+
+            $sql = DB::connection('chill')->select("Select Id,Valid_Frm,Valid_Till From mst_licence_details Where Is_Active=? Order By Id",[1]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 202);
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function update_renewal(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'ren_id' => 'required',
+            'form_date' => 'required',
+            'till_date' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+            DB::connection('chill')->beginTransaction();
+            $sql = DB::connection('chill')->statement("Call USP_ADD_LICENCE_RENEWAL(?,?,?,?,?);",[$request->ren_id,$request->form_date,$request->till_date,auth()->user()->Id,2]);
+
+            if(!$sql){
+                throw new Exception('Operation Error Found !!');
+            }
+           
+                DB::connection('chill')->commit();
+                return response()->json([
+                    'message' => 'Renewal Updated Successfully !!',
+                    'details' => null,
+                ],200);
+            
+        } catch (Exception $ex) {
+            DB::connection('chill')->rollBack();
+            $response = response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => $errors->messages(),
+                'details' => null,
+            ],202);
+        
+            throw new HttpResponseException($response);
+    } 
+    }
+
+    public function process_position(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'position_name' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+            DB::connection('chill')->beginTransaction();
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_POSITION(?,?,?,?);",[null,$request->position_name,auth()->user()->Id,1]);
+
+            if(!$sql){
+                throw new Exception('Operation Error Found !!');
+            }
+           
+                DB::connection('chill')->commit();
+                return response()->json([
+                    'message' => 'Position Successfully Added !!',
+                    'details' => null,
+                ],200);
+            
+        } catch (Exception $ex) {
+            DB::connection('chill')->rollBack();
+            $response = response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => $errors->messages(),
+                'details' => null,
+            ],202);
+        
+            throw new HttpResponseException($response);
+    } 
+    }
+
+    public function get_position(Int $org_id){
+        try {
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+
+            $sql = DB::connection('chill')->select("Select Id,Position_Name From mst_position Where Is_Active=? Order By Id",[1]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 202);
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function update_position(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'position_id' => 'required',
+            'position_name' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+            DB::connection('chill')->beginTransaction();
+            $sql = DB::connection('chill')->statement("Call USP_ADD_EDIT_POSITION(?,?,?,?);",[$request->position_id,$request->position_name,auth()->user()->Id,2]);
+
+            if(!$sql){
+                throw new Exception('Operation Error Found !!');
+            }
+           
+                DB::connection('chill')->commit();
+                return response()->json([
+                    'message' => 'Position Successfully Updated !!',
+                    'details' => null,
+                ],200);
+            
+        } catch (Exception $ex) {
+            DB::connection('chill')->rollBack();
+            $response = response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => $errors->messages(),
+                'details' => null,
+            ],202);
+        
+            throw new HttpResponseException($response);
+    } 
     }
 }
