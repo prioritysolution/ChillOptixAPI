@@ -555,4 +555,198 @@ else{
 } 
 }
 
+public function get_rent_data(Request $request){
+    $validator = Validator::make($request->all(),[
+        'org_id' => 'required',
+        'bond_id' => 'required',
+        'date' => 'required'
+    ]);
+    if($validator->passes()){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+        
+        $sql = DB::connection('chill')->select("Call USP_GET_RENT_DETAILS(?,?);",[$request->bond_id,$request->date]);
+
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'Bond Not Yet Rack Posted !!',
+                'details' => null,
+            ], 202);
+        }
+
+        return response()->json([
+            'message' => 'Data Found',
+            'details' => $sql,
+        ],200);
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => $ex->getMessage(),
+            'details' => null,
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+}
+else{
+    $errors = $validator->errors();
+
+        $response = response()->json([
+            'message' => $errors->messages(),
+            'details' => null,
+        ],202);
+    
+        throw new HttpResponseException($response);
+} 
+}
+
+public function calculate_rent(Request $request){
+    $validator = Validator::make($request->all(),[
+        'org_id' => 'required',
+        'qnty' => 'required',
+        'date' => 'required'
+    ]);
+    if($validator->passes()){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+        
+        $sql = DB::connection('chill')->select("Select UDF_CALCULATE_RENT(?,?) As Cal_Data;",[$request->qnty,$request->date]);
+        $cal_data = json_decode($sql[0]->Cal_Data);
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'Error While Calculating !!',
+                'details' => null,
+            ], 202);
+        }
+
+        return response()->json([
+            'message' => 'Data Found',
+            'details' => $cal_data,
+        ],200);
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => $ex->getMessage(),
+            'details' => null,
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+}
+else{
+    $errors = $validator->errors();
+
+        $response = response()->json([
+            'message' => $errors->messages(),
+            'details' => null,
+        ],202);
+    
+        throw new HttpResponseException($response);
+}  
+}
+
+public function process_rent_collect(Request $request){
+    $validator = Validator::make($request->all(),[
+        'org_id' => 'required',
+        'bond_id' => 'required',
+        'rent_date' => 'required',
+        'tot_amount' => 'required',
+        'fin_id' => 'required',
+        'rent_details' => 'required'
+    ]);
+    if($validator->passes()){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+        DB::connection('chill')->beginTransaction();
+
+        $drop_table = DB::connection('chill')->statement("Drop Temporary Table If Exists temprentdata;");
+        $create_tabl = DB::connection('chill')->statement("Create Temporary Table temprentdata
+                                                            (
+                                                                Rack_Id			Int,
+                                                                Qnty			Int,
+                                                                Basic_Rent		Numeric(18,2),
+                                                                Insurance		Numeric(18,2),
+                                                                Rms_Fees		Numeric(18,2),
+                                                                Drying_Amt		Numeric(18,2)
+                                                            );");
+        $rack_details = $this->convertToObject($request->rent_details);
+        foreach ($rack_details as $rack) {
+            DB::connection('chill')->statement("Insert Into temprentdata (Rack_Id,Qnty,Basic_Rent,Insurance,Rms_Fees,Drying_Amt) Values (?,?,?,?,?,?);",[$rack->rack,$rack->qnty,$rack->basic,$rack->insurance,$rack->rms,$rack->drying]);
+         }
+        $sql = DB::connection('chill')->statement("Call USP_POST_RENT(?,?,?,?,?,?,?,@error,@message);",[$request->bond_id,$request->rent_date,$request->tot_amount,$request->bank_id,$request->ref_vouch,$request->fin_id,auth()->user()->Id]);
+
+        if(!$sql){
+            throw new Exception('Operation Error Found !!');
+        }
+
+        $result = DB::connection('chill')->select("Select @error As Error,@message As Message;");
+        $error_no = $result[0]->Error;
+        $message = $result[0]->Message;
+
+        if($error_No<0){
+            DB::connection('chill')->rollBack();
+            return response()->json([
+                'message' => $message,
+                'details' => null,
+            ], 202);
+        }
+        else{
+            DB::connection('chill')->commit();
+            return response()->json([
+                'message' => $message,
+                'details' => null,
+            ],200);
+        }
+           
+        
+    } catch (Exception $ex) {
+        DB::connection('chill')->rollBack();
+        $response = response()->json([
+            'message' => $ex->getMessage(),
+            'details' => null,
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+}
+else{
+    $errors = $validator->errors();
+
+        $response = response()->json([
+            'message' => $errors->messages(),
+            'details' => null,
+        ],202);
+    
+        throw new HttpResponseException($response);
+}
+}
+
 }

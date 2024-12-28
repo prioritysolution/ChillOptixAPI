@@ -80,6 +80,7 @@ Route::group([
 
 // Dashboard Route Start
 Route::get('/Org/GetSideBar',[UserLogin::class,'get_user_sidebar']);
+Route::get('/Org/ProcessLogout',[UserLogin::class,'process_log_out']);
 
 // Dashboard End
 // Master Route Start
@@ -128,6 +129,9 @@ Route::get('/Org/Processing/GetBondDetails/{org_id}/{bond_id}',[ProcessProcessin
 Route::get('/Org/Processing/SearchBookForRack/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_rack_book']);
 Route::get('/Org/Processing/GetBondBooking/{org_id}/{book_id}',[ProcessProcessing::class,'get_bond_list']);
 Route::post('/Org/Processing/RackPosting',[ProcessProcessing::class,'process_rack_posting']);
+Route::post('/Org/Processing/GetRentData',[ProcessProcessing::class,'get_rent_data']);
+Route::post('/Org/Processing/CalculateRent',[ProcessProcessing::class,'calculate_rent']);
+Route::post('/Org/Processing/CollectRent',[ProcessProcessing::class,'process_rent_collect']);
 
 // Processing Route End
 

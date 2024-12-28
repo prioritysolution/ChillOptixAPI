@@ -159,4 +159,12 @@ class UserLogin extends Controller
             ], 400);
         }
     }
+
+    public function process_log_out(){
+        auth()->user()->tokens()->delete();
+        return response()->json([
+            'message' => 'Logout Successfull',
+            'details' => null,
+        ],200);
+    }
 }
