@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\ProcessOrgination;
 use App\Http\Controllers\Organisation\UserLogin;
 use App\Http\Controllers\Organisation\ProcessMaster;
 use App\Http\Controllers\Organisation\ProcessProcessing;
+use App\Http\Controllers\Organisation\ProcessVoucher;
+use App\Http\Controllers\Organisation\ProcessGeneralReport;
 // User Controller End Here
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +103,7 @@ Route::put('/Org/Master/UpdatePocket',[ProcessMaster::class,'update_pocket']);
 Route::post('/Org/Master/AddAgent',[ProcessMaster::class,'process_agent']);
 Route::get('/Org/Master/GetAgent/{org_id}',[ProcessMaster::class,'get_agent_list']);
 Route::put('/Org/Master/UpdateAgent',[ProcessMaster::class,'update_agent']);
+Route::get('/Org/Master/GetLastRentDate/{org_id}',[ProcessMaster::class,'get_last_rent_date']);
 Route::post('/Org/Master/AddRent',[ProcessMaster::class,'process_rent']);
 Route::get('/Org/Master/GetBankLedger',[ProcessMaster::class,'get_bank_ledger']);
 Route::post('/Org/Master/AddBankAccount',[ProcessMaster::class,'process_bank_account']);
@@ -134,6 +137,24 @@ Route::post('/Org/Processing/CalculateRent',[ProcessProcessing::class,'calculate
 Route::post('/Org/Processing/CollectRent',[ProcessProcessing::class,'process_rent_collect']);
 
 // Processing Route End
+
+// Voucher Entry Start
+
+Route::get('/Org/Voucher/GetLedgerList',[ProcessVoucher::class,'get_ledger_list']);
+Route::post('/Org/Voucher/PostVoucher',[ProcessVoucher::class,'process_voucher']);
+Route::post('/Org/Voucher/GetBankBalance',[ProcessVoucher::class,'get_bank_balance']);
+Route::post('/Org/Voucher/PostBankDeposit',[ProcessVoucher::class,'process_bank_deposit']);
+Route::post('/Org/Voucher/PostBankWithdrw',[ProcessVoucher::class,'process_bank_withdrwan']);
+Route::post('/Org/Voucher/PostBankTransfer',[ProcessVoucher::class,'process_bank_transfer']);
+
+// End Voucher Entry
+
+// General Report Area
+
+Route::post('/Org/GeneralReport/BookingRegister',[ProcessGeneralReport::class,'process_booking_register']);
+Route::post('/Org/GeneralReport/BondRegister',[ProcessGeneralReport::class,'process_bond_register']);
+
+// End General Report Area
 
 });
 

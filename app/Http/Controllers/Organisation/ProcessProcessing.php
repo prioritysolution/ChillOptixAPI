@@ -671,6 +671,7 @@ public function process_rent_collect(Request $request){
         'bond_id' => 'required',
         'rent_date' => 'required',
         'tot_amount' => 'required',
+        'adv_amt' => 'required',
         'fin_id' => 'required',
         'rent_details' => 'required'
     ]);
@@ -701,17 +702,18 @@ public function process_rent_collect(Request $request){
         foreach ($rack_details as $rack) {
             DB::connection('chill')->statement("Insert Into temprentdata (Rack_Id,Qnty,Basic_Rent,Insurance,Rms_Fees,Drying_Amt) Values (?,?,?,?,?,?);",[$rack->rack,$rack->qnty,$rack->basic,$rack->insurance,$rack->rms,$rack->drying]);
          }
-        $sql = DB::connection('chill')->statement("Call USP_POST_RENT(?,?,?,?,?,?,?,@error,@message);",[$request->bond_id,$request->rent_date,$request->tot_amount,$request->bank_id,$request->ref_vouch,$request->fin_id,auth()->user()->Id]);
+        $sql = DB::connection('chill')->statement("Call USP_POST_RENT(?,?,?,?,?,?,?,?,?,@error,@message,@rentdata);",[$request->org_id,$request->bond_id,$request->rent_date,$request->tot_amount,$request->adv_amt,$request->bank_id,$request->ref_vouch,$request->fin_id,auth()->user()->Id]);
 
         if(!$sql){
             throw new Exception('Operation Error Found !!');
         }
 
-        $result = DB::connection('chill')->select("Select @error As Error,@message As Message;");
+        $result = DB::connection('chill')->select("Select @error As Error,@message As Message,@rentdata As Details;");
         $error_no = $result[0]->Error;
         $message = $result[0]->Message;
+        $rent_data = $result[0]->Details;
 
-        if($error_No<0){
+        if($error_no<0){
             DB::connection('chill')->rollBack();
             return response()->json([
                 'message' => $message,
@@ -722,7 +724,7 @@ public function process_rent_collect(Request $request){
             DB::connection('chill')->commit();
             return response()->json([
                 'message' => $message,
-                'details' => null,
+                'details' => json_decode($rent_data),
             ],200);
         }
            
