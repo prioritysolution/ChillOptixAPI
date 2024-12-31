@@ -58,10 +58,10 @@ class ProcessProcessing extends Controller
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
             }
-            $result = DB::connection('chill')->select("Select @error As Error_No,@message As Message,@book As Bok_Id;");
+            $result = DB::connection('chill')->select("Select @error As Error_No,@message As Message,@book As Book_data;");
             $error_No = $result[0]->Error_No;
             $message = $result[0]->Message;
-            $booking_Id = $result[0]->Bok_Id;
+            $booking_data = json_decode($result[0]->Book_data);
 
             if($error_No<0){
                 DB::connection('chill')->rollBack();
@@ -74,7 +74,7 @@ class ProcessProcessing extends Controller
                 DB::connection('chill')->commit();
                 return response()->json([
                     'message' => $message,
-                    'details' => $booking_Id,
+                    'details' => $booking_data,
                 ],200);
             }
             
@@ -467,7 +467,7 @@ public function get_bond_list(Int $org_id,Int $book_id){
         if (empty($sql)) {
             // Custom validation for no data found
             return response()->json([
-                'message' => 'No Data Found',
+                'message' => 'Bond Not Issued Yet !!',
                 'details' => null,
             ], 202);
         }
@@ -578,7 +578,7 @@ public function get_rent_data(Request $request){
         if (empty($sql)) {
             // Custom validation for no data found
             return response()->json([
-                'message' => 'Bond Not Yet Rack Posted !!',
+                'message' => 'Either Bond Is Not Rack Posted Or Released !!',
                 'details' => null,
             ], 202);
         }
@@ -696,11 +696,12 @@ public function process_rent_collect(Request $request){
                                                                 Basic_Rent		Numeric(18,2),
                                                                 Insurance		Numeric(18,2),
                                                                 Rms_Fees		Numeric(18,2),
-                                                                Drying_Amt		Numeric(18,2)
+                                                                Drying_Amt		Numeric(18,2),
+                                                                Adv_Paid        Numeric(18,2)
                                                             );");
         $rack_details = $this->convertToObject($request->rent_details);
         foreach ($rack_details as $rack) {
-            DB::connection('chill')->statement("Insert Into temprentdata (Rack_Id,Qnty,Basic_Rent,Insurance,Rms_Fees,Drying_Amt) Values (?,?,?,?,?,?);",[$rack->rack,$rack->qnty,$rack->basic,$rack->insurance,$rack->rms,$rack->drying]);
+            DB::connection('chill')->statement("Insert Into temprentdata (Rack_Id,Qnty,Basic_Rent,Insurance,Rms_Fees,Drying_Amt,Adv_Paid) Values (?,?,?,?,?,?,?);",[$rack->rack,$rack->qnty,$rack->basic,$rack->insurance,$rack->rms,$rack->drying,$rack->advance]);
          }
         $sql = DB::connection('chill')->statement("Call USP_POST_RENT(?,?,?,?,?,?,?,?,?,@error,@message,@rentdata);",[$request->org_id,$request->bond_id,$request->rent_date,$request->tot_amount,$request->adv_amt,$request->bank_id,$request->ref_vouch,$request->fin_id,auth()->user()->Id]);
 

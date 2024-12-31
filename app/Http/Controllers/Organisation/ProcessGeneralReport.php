@@ -124,4 +124,59 @@ class ProcessGeneralReport extends Controller
             throw new HttpResponseException($response);
     }
     }
+
+    public function process_collection_register(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+    
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.chill', $db);
+            
+            $sql = DB::connection('chill')->select("Call USP_RPT_COLLECTION_REGISTER(?,?);",[$request->form_date,$request->to_date]);
+            
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'Error While Calculating !!',
+                    'details' => null,
+                ], 202);
+            }
+    
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+    
+        } catch (Exception $ex) {
+            
+            $response = response()->json([
+                'message' => $ex->getMessage(),
+                'details' => null,
+            ],400);
+    
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+    
+            $response = response()->json([
+                'message' => $errors->messages(),
+                'details' => null,
+            ],202);
+        
+            throw new HttpResponseException($response);
+    }
+    }
 }

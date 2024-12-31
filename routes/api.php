@@ -153,6 +153,7 @@ Route::post('/Org/Voucher/PostBankTransfer',[ProcessVoucher::class,'process_bank
 
 Route::post('/Org/GeneralReport/BookingRegister',[ProcessGeneralReport::class,'process_booking_register']);
 Route::post('/Org/GeneralReport/BondRegister',[ProcessGeneralReport::class,'process_bond_register']);
+Route::post('/Org/GeneralReport/CollectionRegister',[ProcessGeneralReport::class,'process_collection_register']);
 
 // End General Report Area
 
