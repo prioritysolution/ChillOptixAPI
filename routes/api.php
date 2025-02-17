@@ -15,6 +15,7 @@ use App\Http\Controllers\Organisation\ProcessMaster;
 use App\Http\Controllers\Organisation\ProcessProcessing;
 use App\Http\Controllers\Organisation\ProcessVoucher;
 use App\Http\Controllers\Organisation\ProcessGeneralReport;
+use App\Http\Controllers\Organisation\ProcessLoan;
 // User Controller End Here
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +83,16 @@ Route::group([
 
 // Dashboard Route Start
 Route::get('/Org/GetSideBar',[UserLogin::class,'get_user_sidebar']);
+Route::get('/Org/GetDashboard',[UserLogin::class,'process_dashboard']);
 Route::get('/Org/ProcessLogout',[UserLogin::class,'process_log_out']);
+Route::get('/Org/GetProfile',[UserLogin::class,'get_user_profile']);
+Route::get('/Org/GetUserRole',[UserLogin::class,'get_user_role']);
+Route::post('/Org/AddUser',[UserLogin::class,'process_user']);
+Route::put('/Org/UpdateProfile',[UserLogin::class,'process_update_profile']);
+Route::get('/Org/GetNotification',[UserLogin::class,'process_notification']);
+Route::get('/Org/GetRoleUserList',[UserLogin::class,'get_role_user_list']);
+Route::get('/Org/GetUserRoleMenue',[UserLogin::class,'get_user_role_menue']);
+Route::post('/Org/MapUserRole',[UserLogin::class,'process_map_role']);
 
 // Dashboard End
 // Master Route Start
@@ -149,11 +159,23 @@ Route::post('/Org/Voucher/PostBankTransfer',[ProcessVoucher::class,'process_bank
 
 // End Voucher Entry
 
+// Loan Route Start
+
+Route::get('/Org/ProcessLoan/GetCustomerBond',[ProcessLoan::class,'get_customer_bond']);
+Route::post('/Org/ProcessLoan/ProcessApplication',[ProcessLoan::class,'process_loan']);
+Route::get('/Org/ProcessLoan/SearchLoan',[ProcessLoan::class,'search_loan_account']);
+Route::get('/Org/ProcessLoan/GetLoanDetails',[ProcessLoan::class,'get_loan_details']);
+Route::post('/Org/ProcessLoan/ProcessRepayment',[ProcessLoan::class,'process_loan_repay']);
+Route::get('/Org/ProcessLoan/GetLedger',[ProcessLoan::class,'process_loan_ledger']);
+
+// End Loan Route
+
 // General Report Area
 
 Route::post('/Org/GeneralReport/BookingRegister',[ProcessGeneralReport::class,'process_booking_register']);
 Route::post('/Org/GeneralReport/BondRegister',[ProcessGeneralReport::class,'process_bond_register']);
 Route::post('/Org/GeneralReport/CollectionRegister',[ProcessGeneralReport::class,'process_collection_register']);
+Route::get('/Org/GeneralReport/CustomerEnquery',[ProcessGeneralReport::class,'process_customer_enquery']);
 
 // End General Report Area
 

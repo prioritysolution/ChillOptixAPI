@@ -426,7 +426,7 @@ public function get_bond_details(Int $org_id,Int $bond_id){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Call USP_GET_BOND_DETAILS(?,?);",[$bond_id,1]);
+        $sql = DB::connection('chill')->select("Call USP_GET_BOND_DETAILS(?,?);",[$bond_id,2]);
 
         if (empty($sql)) {
             // Custom validation for no data found
