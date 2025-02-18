@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Config;
+use App\Traits\SendMail;
 use App\Models\OrgUser;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Hash;
@@ -16,6 +17,7 @@ use \stdClass;
 
 class UserLogin extends Controller
 {
+    use SendMail;
     public function convertToObject($array) {
         $object = new stdClass();
         foreach ($array as $key => $value) {
@@ -132,7 +134,7 @@ class UserLogin extends Controller
                 if (!isset($menu_set[$row->Id])) {
                     $menu_set[$row->Id] = [
                         "title" => $row->Module_Name,
-                        "Icon" => $row->Icon,
+                        "Icon" => $row->Module_Icon,
                         "path" => $row->Module_Path,
                         "childLinks" => []
                     ];
@@ -585,5 +587,76 @@ class UserLogin extends Controller
         
             throw new HttpResponseException($response);
     } 
+    }
+
+    public function genereate_otp(Request $request){
+        try {
+            $sql = DB::select("Select UDF_USEROTP(?,?,?) As OTP;",[$request->email,null,1]);
+    
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 202);
+            }
+            $otp = $sql[0]->OTP;
+            if($otp<0){
+                return response()->json([
+                    'message' => 'User Not Exists !!',
+                    'details' => $sql,
+                ],202);
+            }
+            else{
+                $this->otp_send($request->email,$otp,1);
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $otp,
+                ],200);
+            }
+            
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+    
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function verify_otp(Request $request){
+        try {
+            $sql = DB::select("Select UDF_USEROTP(?,?,?) As OTP;",[$request->email,$request->otp,2]);
+    
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => null,
+                ], 202);
+            }
+            $otp = $sql[0]->OTP;
+            if($otp<0){
+                return response()->json([
+                    'message' => 'OTP Is Mismatched !!',
+                    'details' => $sql,
+                ],202);
+            }
+            else{
+                return response()->json([
+                    'message' => 'OTP Verified Successfully',
+                    'details' => null,
+                ],200);
+            }
+            
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+    
+            throw new HttpResponseException($response);
+        }
     }
 }

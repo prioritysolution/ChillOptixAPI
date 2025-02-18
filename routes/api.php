@@ -16,6 +16,7 @@ use App\Http\Controllers\Organisation\ProcessProcessing;
 use App\Http\Controllers\Organisation\ProcessVoucher;
 use App\Http\Controllers\Organisation\ProcessGeneralReport;
 use App\Http\Controllers\Organisation\ProcessLoan;
+use App\Http\Controllers\Organisation\ProcessAccountingReport;
 // User Controller End Here
 /*
 |--------------------------------------------------------------------------
@@ -93,6 +94,8 @@ Route::get('/Org/GetNotification',[UserLogin::class,'process_notification']);
 Route::get('/Org/GetRoleUserList',[UserLogin::class,'get_role_user_list']);
 Route::get('/Org/GetUserRoleMenue',[UserLogin::class,'get_user_role_menue']);
 Route::post('/Org/MapUserRole',[UserLogin::class,'process_map_role']);
+Route::get('/Org/GetOtpForForgotPassword',[UserLogin::class,'genereate_otp']);
+Route::get('/Org/VerifyOtp',[UserLogin::class,'verify_otp']);
 
 // Dashboard End
 // Master Route Start
@@ -178,7 +181,14 @@ Route::post('/Org/GeneralReport/CollectionRegister',[ProcessGeneralReport::class
 Route::get('/Org/GeneralReport/CustomerEnquery',[ProcessGeneralReport::class,'process_customer_enquery']);
 
 // End General Report Area
-
+// Accounting Report
+Route::get('/Org/ProcessFinancialReport/Daybook',[ProcessAccountingReport::class,'process_daybook']);
+Route::get('/Og/ProcessFinancialReport/CashAccount',[ProcessAccountingReport::class,'process_cash_acct']);
+Route::get('/Org/ProcessFinancialReport/CashBook',[ProcessAccountingReport::class,'process_cashbook']);
+Route::get('/Org/ProcessFinancialReport/BankLedger',[ProcessAccountingReport::class,'process_bank_ledger']);
+Route::get('/Org/ProcessFinancialReport/GetLedgerList',[ProcessAccountingReport::class,'get_ledger_list']);
+Route::get('/Org/ProcessFinancialReport/GetLedger',[ProcessAccountingReport::class,'process_ledger']);
+// End Accounting Report
 });
 
 
