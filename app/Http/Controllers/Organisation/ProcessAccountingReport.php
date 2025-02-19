@@ -269,6 +269,7 @@ class ProcessAccountingReport extends Controller
                             'Debit' => $daybook->Dr_Amount,
                             'Credit' => $daybook->Cr_Amount,
                             'Balance' => $daybook->Balance,
+                            'Balance_Type' => $daybook->Balance_Type,
                         ];
                     }
                 }

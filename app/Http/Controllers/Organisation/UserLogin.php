@@ -659,4 +659,86 @@ class UserLogin extends Controller
             throw new HttpResponseException($response);
         }
     }
+
+    public function forgot_passsword(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_mail' =>'required',
+            'user_pass' => 'required'
+        ]);
+
+        if($validator->passes()){
+            try {
+
+                DB::beginTransaction();
+
+                $sql = DB::statement("Update mst_org_user Set User_Pass=? Where User_Mail=?;",[Hash::make($request->user_pass),$request->user_mail]);
+
+                if(!$sql){
+                    DB::rollBack(); 
+                    throw new Exception ('Operation Could Not Be Complete !!');
+                }
+
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'User Password Successfully Changed !!',
+                        'details' => null,
+                    ],200);
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => $ex->getMessage(),
+                    'details' => null,
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => $errors->messages(),
+              'details' => null,
+          ],400);
+      
+          throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_check_fin(Request $request){
+        try {
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.wax', $db);
+
+            $sql = DB::connection('wax')->select("Call USP_RESET_STORE_ID(?);",[$request->year_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'Error In Year Check',
+                    'details' => null,
+                ], 202);
+            }
+            
+            return response()->json([
+                'message' => 'Year Checked Complete',
+                'details' => null,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
 }

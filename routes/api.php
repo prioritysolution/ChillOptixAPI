@@ -76,7 +76,9 @@ Route::group([
 // Login Route
 
 Route::post('/Org/ProcessLogin',[UserLogin::class,'process_user_login'])->middleware('api_access');
-
+Route::get('/Org/GetOtpForForgotPassword',[UserLogin::class,'genereate_otp']);
+Route::get('/Org/VerifyOtp',[UserLogin::class,'verify_otp']);
+Route::put('/Org/ForgotUserPassword',[UserLogin::class,'forgot_passsword']);
 
 Route::group([
     'middleware' => ['auth:sanctum',]
@@ -94,8 +96,8 @@ Route::get('/Org/GetNotification',[UserLogin::class,'process_notification']);
 Route::get('/Org/GetRoleUserList',[UserLogin::class,'get_role_user_list']);
 Route::get('/Org/GetUserRoleMenue',[UserLogin::class,'get_user_role_menue']);
 Route::post('/Org/MapUserRole',[UserLogin::class,'process_map_role']);
-Route::get('/Org/GetOtpForForgotPassword',[UserLogin::class,'genereate_otp']);
-Route::get('/Org/VerifyOtp',[UserLogin::class,'verify_otp']);
+Route::get('/Org/CheckFinYear',[UserLogin::class,'process_check_fin']);
+
 
 // Dashboard End
 // Master Route Start

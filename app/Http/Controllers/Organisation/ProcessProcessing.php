@@ -462,7 +462,7 @@ public function get_bond_list(Int $org_id,Int $book_id){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=?",[$book_id]);
+        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=? And Is_Active=1",[$book_id]);
 
         if (empty($sql)) {
             // Custom validation for no data found

@@ -188,7 +188,7 @@ public function search_loan_account(Request $request){
         c.Mobile 
         FROM mst_loan_account m 
         JOIN mst_customer c ON c.Id = m.Cust_Id 
-        WHERE c.Cust_Name LIKE ?;", ["%{$request->cust_name}%"]);
+        WHERE c.Cust_Name LIKE ? And UDF_CAL_LOAN_BALANCE(m.Id,?)<>0;", ["%{$request->cust_name}%",$request->date]);
 
         if (empty($sql)) {
             // Custom validation for no data found
@@ -228,7 +228,7 @@ public function get_loan_details(Request $request){
         $sql = DB::connection('chill')->select("Select m.Id,m.Account_No,m.Manual_Acct,m.Ledg_Folio,m.Appl_Amount As Loan_Amount,m.Appl_Date,m.ROI,m.Duration,m.Repay_Within,c.Cust_Name,c.Relation_Name,Concat(c.Village,', ',c.Post_Off,', ',c.Dist,', ',c.Pin_Code) As Address,c.Mobile,b.Id As Bond_Id,b.Bond_No,b.Issue_Date,b.Issue_Pack,UDF_CAL_LOAN_BALANCE(m.Id,?) As Loan_Balance,UDF_CAL_LOAN_INTT(m.Id,?,1) As Intt,UDF_CAL_LOAN_INTT(m.Id,?,2) As Days From mst_loan_account m 
                                                 Join mst_customer c On c.Id=m.Cust_Id 
                                                 Join mst_loan_bond_details d On d.Acct_Id=m.Id 
-                                                Join mst_bond_master b On b.Id=d.Bond_Id Where m.Account_No=?;",[$request->date,$request->date,$request->date,$request->acct_no]);
+                                                Join mst_bond_master b On b.Id=d.Bond_Id Where m.Account_No=?",[$request->date,$request->date,$request->date,$request->acct_no]);
 
         if (empty($sql)) {
             // Custom validation for no data found
