@@ -206,7 +206,7 @@ public function get_booking_details(Int $org_id,Int $book_no){
         if (empty($sql)) {
             // Custom validation for no data found
             return response()->json([
-                'message' => 'No Data Found',
+                'message' => 'Either Booking No Not Exists Or Already Bond Issued',
                 'details' => null,
             ], 202);
         }
@@ -462,12 +462,12 @@ public function get_bond_list(Int $org_id,Int $book_id){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=? And Is_Active=1",[$book_id]);
+        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=? And Is_Active=1 And Is_Rack=0",[$book_id]);
 
         if (empty($sql)) {
             // Custom validation for no data found
             return response()->json([
-                'message' => 'Bond Not Issued Yet !!',
+                'message' => 'Either Bond Not Issued Yet Or Already Rack Posted !!',
                 'details' => null,
             ], 202);
         }
@@ -574,7 +574,8 @@ public function get_rent_data(Request $request){
         config()->set('database.connections.chill', $db);
         
         $sql = DB::connection('chill')->select("Call USP_GET_RENT_DETAILS(?,?);",[$request->bond_id,$request->date]);
-
+        $error_No = $sql[0]->Error_No;
+        $error_Message = $sql[0]->Message;
         if (empty($sql)) {
             // Custom validation for no data found
             return response()->json([
@@ -583,10 +584,19 @@ public function get_rent_data(Request $request){
             ], 202);
         }
 
-        return response()->json([
-            'message' => 'Data Found',
-            'details' => $sql,
-        ],200);
+        if($error_No<0){
+            return response()->json([
+                'message' =>$error_Message ,
+                'details' => null,
+            ], 202);
+        }
+        else{
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        }
+        
 
     } catch (Exception $ex) {
         
