@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ProcessOrgination;
 use App\Http\Controllers\Organisation\UserLogin;
 use App\Http\Controllers\Organisation\ProcessMaster;
 use App\Http\Controllers\Organisation\ProcessProcessing;
+use App\Http\Controllers\Organisation\ProcessRectify;
 use App\Http\Controllers\Organisation\ProcessVoucher;
 use App\Http\Controllers\Organisation\ProcessGeneralReport;
 use App\Http\Controllers\Organisation\ProcessLoan;
@@ -53,11 +54,20 @@ Route::group([
 
     Route::post('/Admin/ProcessOrg/AddOrg',[ProcessOrgination::class,'process_org']);
     Route::get('/Admin/ProcessOrg/GetOrgList',[ProcessOrgination::class,'get_org_list']);
+    Route::post('/Admin/ProcessOrg/UpdateOrg',[ProcessOrgination::class,'update_org']);
     Route::post('/Admin/ProcessOrg/AddFinYear',[ProcessOrgination::class,'process_org_finyear']);
     Route::get('/Admin/ProcessOrg/CheckRental/{org_id}',[ProcessOrgination::class,'check_org_rental']);
     Route::post('/Admin/ProcessOrg/AddRental',[ProcessOrgination::class,'process_rental']);
     Route::get('/Admin/ProcessOrg/GetUserRole',[ProcessOrgination::class,'get_org_user_role']);
     Route::post('/Admin/ProcessOrg/AddUser',[ProcessOrgination::class,'process_org_user']);
+    Route::get('/Admin/ProcessOrg/GetAcctMainHead',[ProcessOrgination::class,'get_account_head']);
+    Route::post('/Admin/ProcessOrg/AddAccountHead',[ProcessOrgination::class,'process_acct_head']);
+    Route::get('/Admin/ProcessOrg/GetAccountHead',[ProcessOrgination::class,'get_acct_head_list']);
+    Route::put('/Admin/ProcessOrg/UpdateAccountHead',[ProcessOrgination::class,'update_acct_head']);
+    Route::post('/Admin/ProcessOrg/AddAccountLedger',[ProcessOrgination::class,'process_acct_ledger']);
+    Route::get('/Admin/ProcessOrg/GetAccountLedger',[ProcessOrgination::class,'get_acct_ledger_list']);
+    Route::put('/Admin/ProcessOrg/UpdateAccountLedger',[ProcessOrgination::class,'update_acct_ledger']);
+    Route::post('/Admin/ProcessOrg/MapDefaultLedger',[ProcessOrgination::class,'process_default_ledger']);
 
 
     // Orgination Route End Here
@@ -116,7 +126,7 @@ Route::post('/Org/Master/AddPocket',[ProcessMaster::class,'process_pocket']);
 Route::get('/Org/Master/GetPocket/{org_id}',[ProcessMaster::class,'get_pocket_list']);
 Route::put('/Org/Master/UpdatePocket',[ProcessMaster::class,'update_pocket']);
 Route::post('/Org/Master/AddAgent',[ProcessMaster::class,'process_agent']);
-Route::get('/Org/Master/GetAgent/{org_id}',[ProcessMaster::class,'get_agent_list']);
+Route::get('/Org/Master/GetAgent',[ProcessMaster::class,'get_agent_list']);
 Route::put('/Org/Master/UpdateAgent',[ProcessMaster::class,'update_agent']);
 Route::get('/Org/Master/GetLastRentDate/{org_id}',[ProcessMaster::class,'get_last_rent_date']);
 Route::post('/Org/Master/AddRent',[ProcessMaster::class,'process_rent']);
@@ -138,13 +148,13 @@ Route::put('/Org/Master/UpdatePosition',[ProcessMaster::class,'update_position']
 
 Route::post('/Org/Processing/GeneralBooking',[ProcessProcessing::class,'process_general_booking']);
 Route::get('/Org/Processing/GetBookingData/{org_id}/{book_id}',[ProcessProcessing::class,'get_gen_booking']);
-Route::get('/Org/Processing/GetCustomer/{org_id}/{keyword}',[ProcessProcessing::class,'get_customer']);
+Route::get('/Org/Processing/GetCustomer',[ProcessProcessing::class,'get_customer']);
 Route::get('/Org/Processing/GetBookingDetails/{org_id}/{book_no}',[ProcessProcessing::class,'get_booking_details']);
-Route::get('/Org/Processing/SearchBooking/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_booking_data']);
+Route::get('/Org/Processing/SearchBooking',[ProcessProcessing::class,'search_booking_data']);
 Route::post('/Org/Processing/BondEntry',[ProcessProcessing::class,'process_bond']);
 Route::get('/Org/Processing/SearchBond/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_bond']);
 Route::get('/Org/Processing/GetBondDetails/{org_id}/{bond_id}',[ProcessProcessing::class,'get_bond_details']);
-Route::get('/Org/Processing/SearchBookForRack/{org_id}/{type}/{keyword}',[ProcessProcessing::class,'search_rack_book']);
+Route::get('/Org/Processing/SearchBookForRack',[ProcessProcessing::class,'search_rack_book']);
 Route::get('/Org/Processing/GetBondBooking/{org_id}/{book_id}',[ProcessProcessing::class,'get_bond_list']);
 Route::post('/Org/Processing/RackPosting',[ProcessProcessing::class,'process_rack_posting']);
 Route::post('/Org/Processing/GetRentData',[ProcessProcessing::class,'get_rent_data']);
@@ -191,6 +201,12 @@ Route::get('/Org/ProcessFinancialReport/BankLedger',[ProcessAccountingReport::cl
 Route::get('/Org/ProcessFinancialReport/GetLedgerList',[ProcessAccountingReport::class,'get_ledger_list']);
 Route::get('/Org/ProcessFinancialReport/GetLedger',[ProcessAccountingReport::class,'process_ledger']);
 // End Accounting Report
+
+// Rectify route start here
+Route::post('/Org/ProcessRectify/CancelBooking',[ProcessRectify::class,'calcel_booking']);
+Route::post('/Org/ProcessRectify/CancelBond',[ProcessRectify::class,'cancel_bond']);
+// Rectify Route End Here
+
 });
 
 

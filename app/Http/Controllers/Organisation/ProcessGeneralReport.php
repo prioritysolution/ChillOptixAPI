@@ -37,7 +37,7 @@ class ProcessGeneralReport extends Controller
             if (empty($sql)) {
                 // Custom validation for no data found
                 return response()->json([
-                    'message' => 'Error While Calculating !!',
+                    'message' => 'No Data Found !!',
                     'details' => null,
                 ], 202);
             }
@@ -93,7 +93,7 @@ class ProcessGeneralReport extends Controller
             if (empty($sql)) {
                 // Custom validation for no data found
                 return response()->json([
-                    'message' => 'Error While Calculating !!',
+                    'message' => 'No Data Found !!',
                     'details' => null,
                 ], 202);
             }
@@ -148,7 +148,7 @@ class ProcessGeneralReport extends Controller
             if (empty($sql)) {
                 // Custom validation for no data found
                 return response()->json([
-                    'message' => 'Error While Calculating !!',
+                    'message' => 'No Data Found !!',
                     'details' => null,
                 ], 202);
             }

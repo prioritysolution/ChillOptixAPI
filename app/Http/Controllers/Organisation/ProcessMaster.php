@@ -794,40 +794,56 @@ class ProcessMaster extends Controller
     }  
     }
 
-    public function get_agent_list(Int $org_id){
+    public function get_agent_list(Request $request){
         try {
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $limit = $request->input('per_page', 10); // Default limit 10
+            $keyword = $request->input('keyword', ''); // Default to an empty string
+            
+            // Get schema name
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception("Organization schema not found.");
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
-
-            $sql = DB::connection('chill')->select("Select Id,Agent_Name,Relation_Name,Address,Mobile,Mail,Deposit_Amt,Is_Percent,Comm_Rate From mst_agent_master Order By Id");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Build query dynamically
+            $query = DB::connection('chill')->table('mst_agent_master')
+                ->select('Id', 'Agent_Name', 'Relation_Name', 'Address', 'Mobile', 'Mail', 'Deposit_Amt', 'Is_Percent', 'Comm_Rate')
+                ->orderBy('Id');
+        
+            // Apply search condition only if a keyword is provided
+            if (!empty($keyword)) {
+                $query->where('Agent_Name', 'LIKE', "%{$keyword}%");
+            }
+        
+            // Apply pagination
+            $paginatedData = $query->paginate($limit);
+        
+            if ($paginatedData->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => null,
                 ], 202);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'details' => $paginatedData,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function update_agent(Request $request){

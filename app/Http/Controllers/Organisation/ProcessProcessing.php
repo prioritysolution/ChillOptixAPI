@@ -30,16 +30,10 @@ class ProcessProcessing extends Controller
             'org_id' => 'required',
             'booking_date' => 'required',
             'cust_name' => 'required',
-            'relation_name' => 'required',
             'village' => 'required',
-            'post' => 'required',
-            'pin' => 'required',
-            'dist' => 'required',
-            'mob' => 'required',
             'qunty' => 'required',
-            'amount' => 'required',
-            'valid_till' => 'required',
-            'fin_id' => 'required'
+            'fin_id' => 'required',
+            'is_man' => 'required',
         ]);
         if($validator->passes()){
         try {
@@ -53,7 +47,7 @@ class ProcessProcessing extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.chill', $db);
             DB::connection('chill')->beginTransaction();
-            $sql = DB::connection('chill')->statement("Call USP_ADD_GEN_BOOKING(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@book);",[$request->org_id,$request->cust_id,$request->booking_date,$request->cust_name,$request->relation_name,$request->village,$request->post,$request->pin,$request->dist,$request->mob,$request->qunty,$request->amount,$request->bank_id,$request->valid_till,$request->agent_id,$request->ref_vouch,auth()->user()->Id,$request->fin_id]);
+            $sql = DB::connection('chill')->statement("Call USP_ADD_GEN_BOOKING(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@book);",[$request->org_id,$request->cust_id,$request->booking_date,$request->ref_no,$request->cust_name,$request->relation_name,$request->village,$request->post,$request->pin,$request->dist,$request->mob,$request->qunty,$request->amount,$request->bank_id,$request->valid_till,$request->agent_id,$request->ref_vouch,auth()->user()->Id,$request->fin_id,$request->is_man]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -136,58 +130,59 @@ class ProcessProcessing extends Controller
         }
     }
 
-    public function get_customer(Int $org_id, String $keyword)
+    public function get_customer(Request $request)
 {
+
     try {
         // Step 1: Retrieve the organization's schema name
-        $schemaQuery = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db", [$org_id]);
+        $schemaQuery = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db", [$request->org_id]);
         if (!$schemaQuery || !isset($schemaQuery[0]->db)) {
-            throw new Exception("Schema not found for the provided organization ID: $org_id");
+            throw new Exception("Schema not found for the provided organization ID: $request->org_id");
         }
-
+    
         $org_schema = $schemaQuery[0]->db;
-
+    
         // Step 2: Dynamically update database configuration
         $dbConfig = Config::get('database.connections.mysql');
         if (!$dbConfig) {
             throw new Exception("MySQL connection configuration is missing.");
         }
-
+    
         $dbConfig['database'] = $org_schema; // Set schema dynamically
         config()->set('database.connections.chill', $dbConfig);
-
-        // Step 3: Perform the database query on the dynamic connection
-        $customerQuery = DB::connection('chill')->select(
-            "SELECT Id, Cust_Name, Relation_Name, Village,Post_Off,Pin_Code,Dist,Mobile 
-             FROM mst_customer 
-             WHERE Cust_Name LIKE ?",
-            ["%$keyword%"]
-        );
-
+    
+        // Step 3: Get paginated results using Query Builder
+        $perPage = $request->input('per_page', 10); // Default 10 records per page
+        $customers = DB::connection('chill')->table('mst_customer')
+            ->select('Id', 'Cust_Name', 'Relation_Name', 'Village', 'Post_Off', 'Pin_Code', 'Dist', 'Mobile')
+            ->where('Cust_Name', 'LIKE', "%{$request->keyword}%")
+            ->paginate($perPage);
+    
         // Step 4: Handle the case where no data is found
-        if (empty($customerQuery)) {
+        if ($customers->isEmpty()) {
             return response()->json([
                 'message' => 'No Data Found',
                 'details' => null,
             ], 202);
         }
-
-        // Step 5: Return successful response with data
+    
+        // Step 5: Return paginated response
         return response()->json([
             'message' => 'Data Found',
-            'details' => $customerQuery,
+            'details' => $customers,
         ], 200);
-
+    
     } catch (Exception $ex) {
         // Log the error for debugging
         Log::error('Error in fetching customer data:', ['error' => $ex->getMessage()]);
-
+    
         // Return error response
         return response()->json([
             'message' => 'Error Found',
             'details' => $ex->getMessage(),
         ], 500);
     }
+    
 }
 
 public function get_booking_details(Int $org_id,Int $book_no){
@@ -226,76 +221,132 @@ public function get_booking_details(Int $org_id,Int $book_no){
     }
 }
 
-public function search_booking_data(Int $org_id,Int $type,String $keyword){
+public function search_booking_data(Request $request){
     try {
-        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-        if(!$sql){
-          throw new Exception;
+        $org_id = $request->org_id;
+        $type = $request->type;
+        $keyword = $request->keyword;
+        $page = $request->page ?? 1;
+        $perPage = $request->per_page ?? 10;
+        $offset = ($page - 1) * $perPage;
+
+        // Get organization schema
+        $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) AS db;", [$org_id]);
+        if (!$sql) {
+            throw new Exception("Organization schema not found");
         }
         $org_schema = $sql[0]->db;
+
+        // Update database connection dynamically
         $db = Config::get('database.connections.mysql');
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Call USP_SEARCH_BOOKING(?,?,?);",[$type,$keyword,1]);
+        // Call stored procedure for paginated data
+        $sql = DB::connection('chill')->select("CALL USP_SEARCH_BOOKING(?,?,?,?,?);", [
+            $type, 
+            $keyword, 
+            1, // Change this dynamically if needed
+            $perPage, 
+            $offset
+        ]);
 
         if (empty($sql)) {
-            // Custom validation for no data found
             return response()->json([
                 'message' => 'No Data Found',
                 'details' => null,
             ], 202);
         }
 
+        // Extract total count from first result (assuming all rows return the same total count)
+        $totalRecords = $sql[0]->total ?? 0;
+
+        // Return paginated response
         return response()->json([
             'message' => 'Data Found',
             'details' => $sql,
-        ],200);
+            'pagination' => [
+                'total' => $totalRecords,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'last_page' => ceil($totalRecords / $perPage),
+                'from' => $offset + 1,
+                'to' => min($offset + $perPage, $totalRecords),
+            ],
+        ], 200);
 
     } catch (Exception $ex) {
         $response = response()->json([
             'message' => 'Error Found',
             'details' => $ex->getMessage(),
-        ],400);
+        ], 400);
 
         throw new HttpResponseException($response);
-    } 
+    }
 }
 
-public function search_rack_book(Int $org_id,Int $type,String $keyword){
+public function search_rack_book(Request $request){
     try {
-        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-        if(!$sql){
-          throw new Exception;
+        $org_id = $request->org_id;
+        $type = $request->type;
+        $keyword = $request->keyword;
+        $page = $request->page ?? 1;
+        $perPage = $request->per_page ?? 10;
+        $offset = ($page - 1) * $perPage;
+
+        // Get organization schema
+        $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) AS db;", [$org_id]);
+        if (!$sql) {
+            throw new Exception("Organization schema not found");
         }
         $org_schema = $sql[0]->db;
+
+        // Update database connection dynamically
         $db = Config::get('database.connections.mysql');
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Call USP_SEARCH_BOOKING(?,?,?);",[$type,$keyword,2]);
+        // Call stored procedure for paginated data
+        $sql = DB::connection('chill')->select("CALL USP_SEARCH_BOOKING(?,?,?,?,?);", [
+            $type, 
+            $keyword, 
+            2, // Change this dynamically if needed
+            $perPage, 
+            $offset
+        ]);
 
         if (empty($sql)) {
-            // Custom validation for no data found
             return response()->json([
                 'message' => 'No Data Found',
                 'details' => null,
             ], 202);
         }
 
+        // Extract total count from first result (assuming all rows return the same total count)
+        $totalRecords = $sql[0]->total ?? 0;
+
+        // Return paginated response
         return response()->json([
             'message' => 'Data Found',
             'details' => $sql,
-        ],200);
+            'pagination' => [
+                'total' => $totalRecords,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'last_page' => ceil($totalRecords / $perPage),
+                'from' => $offset + 1,
+                'to' => min($offset + $perPage, $totalRecords),
+            ],
+        ], 200);
 
     } catch (Exception $ex) {
         $response = response()->json([
             'message' => 'Error Found',
             'details' => $ex->getMessage(),
-        ],400);
+        ], 400);
 
         throw new HttpResponseException($response);
-    } 
+    }
 }
 
 public function process_bond(Request $request){
@@ -304,7 +355,8 @@ public function process_bond(Request $request){
         'book_id' => 'required',
         'bond_date' => 'required',
         'bond_data' => 'required',
-        'fin_id' => 'required'
+        'fin_id' => 'required',
+        'is_man' => 'required'
     ]);
     if($validator->passes()){
     try {
@@ -324,13 +376,14 @@ public function process_bond(Request $request){
                                         (
                                             Bond_Qnty				Numeric(18,2),
                                             Bond_Pack				Int,
+                                            Ref_No                  Int,
                                             Remarks				    Varchar(150)
                                         );");
         $bond_data = $this->convertToObject($request->bond_data);
         foreach ($bond_data as $bond) {
-            DB::connection('chill')->statement("Insert Into tempbonddata (Bond_Qnty,Bond_Pack,Remarks) Values (?,?,?);",[$bond->bond_qnty,$bond->bond_pack,$bond->verified]);
+            DB::connection('chill')->statement("Insert Into tempbonddata (Bond_Qnty,Bond_Pack,Ref_No,Remarks) Values (?,?,?,?);",[$bond->bond_qnty,$bond->bond_pack,$bond->ref_no,$bond->verified]);
          }
-        $sql = DB::connection('chill')->statement("Call USP_POST_BOND_ENTRY(?,?,?,?,?,@error,@message,@bond);",[$request->org_id,$request->book_id,$request->bond_date,$request->fin_id,auth()->user()->Id]);
+        $sql = DB::connection('chill')->statement("Call USP_POST_BOND_ENTRY(?,?,?,?,?,?,@error,@message,@bond);",[$request->org_id,$request->book_id,$request->bond_date,$request->fin_id,$request->is_man,auth()->user()->Id]);
 
         if(!$sql){
             throw new Exception('Operation Error Found !!');
@@ -426,7 +479,7 @@ public function get_bond_details(Int $org_id,Int $bond_id){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Call USP_GET_BOND_DETAILS(?,?);",[$bond_id,2]);
+        $sql = DB::connection('chill')->select("Call USP_GET_BOND_DETAILS(?,?);",[$bond_id,1]);
 
         if (empty($sql)) {
             // Custom validation for no data found
@@ -574,8 +627,6 @@ public function get_rent_data(Request $request){
         config()->set('database.connections.chill', $db);
         
         $sql = DB::connection('chill')->select("Call USP_GET_RENT_DETAILS(?,?);",[$request->bond_id,$request->date]);
-        $error_No = $sql[0]->Error_No;
-        $error_Message = $sql[0]->Message;
         if (empty($sql)) {
             // Custom validation for no data found
             return response()->json([
@@ -583,6 +634,10 @@ public function get_rent_data(Request $request){
                 'details' => null,
             ], 202);
         }
+
+        $error_No = $sql[0]->Error_No;
+        $error_Message = $sql[0]->Message;
+        
 
         if($error_No<0){
             return response()->json([
