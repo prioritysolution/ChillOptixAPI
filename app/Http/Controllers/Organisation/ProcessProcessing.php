@@ -515,7 +515,7 @@ public function get_bond_list(Int $org_id,Int $book_id){
         $db['database'] = $org_schema;
         config()->set('database.connections.chill', $db);
 
-        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=? And Is_Active=1 And Is_Rack=0",[$book_id]);
+        $sql = DB::connection('chill')->select("Select Id,Bond_No From mst_bond_master Where Book_Id=(Select Id From mst_gen_booking Where Book_No=? And Is_Active=1) And Is_Active=1 And Is_Rack=0",[$book_id]);
 
         if (empty($sql)) {
             // Custom validation for no data found
@@ -815,6 +815,94 @@ else{
     
         throw new HttpResponseException($response);
 }
+}
+
+public function get_release_order(Request $request){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+        
+        $sql = DB::connection('chill')->select("Call USP_GET_RELEASE_DATA(?,?);",[$request->bond_id,$request->date]);
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'Either Bond Is Not Rack Posted Or Released !!',
+                'details' => null,
+            ], 202);
+        }
+
+        $error_No = $sql[0]->Error_No;
+        $error_Message = $sql[0]->Message;
+        
+
+        if($error_No<0){
+            return response()->json([
+                'message' =>$error_Message ,
+                'details' => null,
+            ], 202);
+        }
+        else{
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        }
+        
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => $ex->getMessage(),
+            'details' => null,
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+}
+
+public function get_release_count(Request $request){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.chill', $db);
+        
+        $sql = DB::connection('chill')->select("Select (Select Count(*) From trn_release_order Where Trans_Date=? And Is_Collected=0 And Is_Active=1 And Is_Dry=0) As Wet,(Select Count(*) From trn_release_order Where Trans_Date=? And Is_Collected=0 And Is_Active=1 And Is_Dry=1) As Dry;",[$request->date,$request->date]);
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found !!',
+                'details' => null,
+            ], 202);
+        }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => $ex->getMessage(),
+            'details' => null,
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
 }
 
 }

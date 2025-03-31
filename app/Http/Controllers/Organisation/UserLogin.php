@@ -203,7 +203,7 @@ class UserLogin extends Controller
                 'Bond_Issue' => 0,
                 'Pending_Rack' => 0,
                 'Pending_Bond' =>0,
-                'Chamber_Data' => []
+                'floor_data' => []
             ];
             
             foreach ($sql as $item) {
@@ -214,31 +214,30 @@ class UserLogin extends Controller
                 $dashboard_item['Pending_Bond'] = $item->Pending_Bond;
             
                 // Initialize chamber if not already set
-                if (!isset($dashboard_item['Chamber_Data'][$item->Chember_id])) {
-                    $dashboard_item['Chamber_Data'][$item->Chember_id] = [
-                        'Chamber_Id' => $item->Chember_id,
-                        'Capacity' => $item->Capacity,
-                        'Chamber_Name' => $item->Chamber_Name,
-                        'Qnty' => $item->Chamber_Qnty,
-                        'Rack_Data' => []
+                if (!isset($dashboard_item['floor_data'][$item->Floor_Id])) {
+                    $dashboard_item['floor_data'][$item->Floor_Id] = [
+                        'Floor_Id' => $item->Floor_Id,
+                        'Floor_Name' => $item->Floor_Name,
+                        'Capacity' => $item->Floor_Capacity,
+                        'Chamber_Data' => []
                     ];
                 }
             
                 // Initialize rack if not already set
-                if (!isset($dashboard_item['Chamber_Data'][$item->Chember_id]['Rack_Data'][$item->Rack_Id])) {
-                    $dashboard_item['Chamber_Data'][$item->Chember_id]['Rack_Data'][$item->Rack_Id] = [
-                        'Rack_Id' => $item->Rack_Id,
-                        'Rack_Name' => $item->Rack_Name,
-                        'Capacity' => $item->Rack_Capacity,
-                        'Qnty' => $item->Rack_Qnty
+                if (!isset($dashboard_item['floor_data'][$item->Floor_Id]['Chamber_Data'][$item->Chember_id])) {
+                    $dashboard_item['floor_data'][$item->Floor_Id]['Chamber_Data'][$item->Chember_id] = [
+                        'Chamber_Id' => $item->Chember_id,
+                        'Chamber_Name' => $item->Chamber_Name,
+                        'Capacity' => $item->Capacity,
+                        'Qnty' => $item->Chamber_Qnty
                     ];
                 }
             }
             
             // Convert Chamber_Data and Rack_Data associative arrays to indexed arrays
-            $dashboard_item['Chamber_Data'] = array_values($dashboard_item['Chamber_Data']);
-            foreach ($dashboard_item['Chamber_Data'] as &$chamber) {
-                $chamber['Rack_Data'] = array_values($chamber['Rack_Data']);
+            $dashboard_item['floor_data'] = array_values($dashboard_item['floor_data']);
+            foreach ($dashboard_item['floor_data'] as &$chamber) {
+                $chamber['Chamber_Data'] = array_values($chamber['Chamber_Data']);
             }
             
             return response()->json([

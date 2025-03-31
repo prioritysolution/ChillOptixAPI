@@ -160,6 +160,8 @@ Route::post('/Org/Processing/RackPosting',[ProcessProcessing::class,'process_rac
 Route::post('/Org/Processing/GetRentData',[ProcessProcessing::class,'get_rent_data']);
 Route::post('/Org/Processing/CalculateRent',[ProcessProcessing::class,'calculate_rent']);
 Route::post('/Org/Processing/CollectRent',[ProcessProcessing::class,'process_rent_collect']);
+Route::get('/Org/Processing/GetReleaseOrder',[ProcessProcessing::class,'get_release_order']);
+Route::get('/Org/Processing/GetReleaseCount',[ProcessProcessing::class,'get_release_count']);
 
 // Processing Route End
 
